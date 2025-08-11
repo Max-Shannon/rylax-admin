@@ -68,10 +68,6 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     double subtitleSize = FontSizeUtils.determineSubtitleSize(context);
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(75),
-        child: DefaultAppBar(toggleSettingsPanel: doNothing),
-      ),
       body: Center(
         child: Card(
           color: AppColors.mainWhite,

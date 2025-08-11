@@ -21,9 +21,8 @@ class AppState extends ChangeNotifier {
 enum AppView {
   login,
   forgotPassword,
+  dashboardHome,
   tcs,
-  end,
-  mvpMap,
 }
 
 extension AppViewExtension on AppView {

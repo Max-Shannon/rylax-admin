@@ -18,6 +18,12 @@ class AppTextStyles {
     );
   }
 
+  static TextStyle defaultFontStyle2(double fontSize) {
+    return GoogleFonts.lexend(
+      textStyle: TextStyle(fontSize: fontSize, color: AppColors.mainWhite),
+    );
+  }
+
   static TextStyle defaultUnderlinedFont(double fontSize) {
     return GoogleFonts.lexend(
       textStyle: TextStyle(

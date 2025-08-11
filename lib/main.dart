@@ -28,7 +28,7 @@ class BuyersPortalApp extends StatelessWidget {
     return ChangeNotifierProvider.value(
       value: appState,
       child: MaterialApp(
-        title: 'Rylax Buyer Portal',
+        title: 'Rylax Admin',
         theme: ThemeData(
           useMaterial3: true,
           bottomSheetTheme: BottomSheetThemeData(backgroundColor: Colors.transparent),
