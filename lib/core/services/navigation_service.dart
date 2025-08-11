@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:rylax_admin/features/dashboard/dashboard_home.dart';
+import 'package:rylax_admin/features/dashboard/presentation/dashboard_home.dart';
 
 import '../../features/login/presentation/forgot_password.dart';
 import '../../features/login/presentation/login_page.dart';
