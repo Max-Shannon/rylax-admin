@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
 import '../services/rylax_api_service.dart';
-import 'logged_in_container.dart';
 import 'logged_out_container.dart';
 
 class AuthGate extends StatefulWidget {

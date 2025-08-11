@@ -2,12 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppState extends ChangeNotifier {
-  AppView currentView = AppView.register;
+  AppView currentView = AppView.login;
 
   Future<void> restoreView() async {
     final prefs = await SharedPreferences.getInstance();
     final last = prefs.getString('lastView');
-    currentView = last != null ? AppViewExtension.fromString(last) : AppView.register;
+    currentView = last != null ? AppViewExtension.fromString(last) : AppView.login;
   }
 
   Future<void> setView(AppView view) async {
@@ -19,8 +19,8 @@ class AppState extends ChangeNotifier {
 }
 
 enum AppView {
-  register,
   login,
+  forgotPassword,
   tcs,
   end,
   mvpMap,
@@ -30,6 +30,6 @@ extension AppViewExtension on AppView {
   String get name => toString().split('.').last;
 
   static AppView fromString(String value) {
-    return AppView.values.firstWhere((e) => e.name == value, orElse: () => AppView.register);
+    return AppView.values.firstWhere((e) => e.name == value, orElse: () => AppView.login);
   }
 }
