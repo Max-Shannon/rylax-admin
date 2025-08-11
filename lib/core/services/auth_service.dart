@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 
 import '../styles/app_colors.dart';
 import '../utils/snack_barz.dart';
+import 'navigation_service.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -45,8 +46,7 @@ class AuthService {
 
   Future<void> signOut(BuildContext context) async {
     await _auth.signOut();
-    //TODO:
-    //NavigationService().navigateToLoginView(context);
+    NavigationService().navigateToLoginView(context);
   }
 
   void _showLoginFailedSnackBar(BuildContext context) {
