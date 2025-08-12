@@ -3,7 +3,7 @@ import 'package:rylax_admin/core/styles/app_colors.dart';
 import 'package:rylax_admin/core/widgets/app_form_submit_button.dart';
 import 'package:rylax_admin/core/widgets/app_text.dart';
 
-import '../../core/network/models/development_dto.dart';
+import '../../../core/network/models/development_dto.dart';
 
 class DevelopmentCard extends StatelessWidget {
   final DevelopmentDTO? dev;

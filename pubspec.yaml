@@ -44,6 +44,7 @@ dependencies:
   json_serializable: ^6.9.5
   json_annotation: ^4.9.0
   build_runner: ^2.6.0
+  pluto_grid: ^8.0.0
 
 dev_dependencies:
   flutter_test:

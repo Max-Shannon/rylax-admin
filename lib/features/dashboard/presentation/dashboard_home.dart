@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:rylax_admin/core/network/models/development_dto.dart';
 import 'package:rylax_admin/core/styles/app_colors.dart';
 import 'package:rylax_admin/core/utils/screen_size_utils.dart';
 import 'package:rylax_admin/core/widgets/app_button_with_icon.dart';
 import 'package:rylax_admin/features/buyers/buyers_home.dart';
 import 'package:rylax_admin/features/dashboard/presentation/dashboard_data.dart';
-import 'package:rylax_admin/features/developments/developments_home.dart';
+import 'package:rylax_admin/features/developments/presentation/development_view.dart';
+import 'package:rylax_admin/features/developments/presentation/developments_home.dart';
 import 'package:rylax_admin/features/settings/settings.dart';
+
+import '../../developments/presentation/development_view_v2.dart';
 
 class DashboardHome extends StatefulWidget {
   const DashboardHome({super.key});
@@ -25,7 +29,7 @@ class _DashboardHomeState extends State<DashboardHome> {
 
   void openDevelopments(BuildContext context) {
     setState(() {
-      selectedWidget = DevelopmentsHome();
+      selectedWidget = DevelopmentsHome(openDevelopmentView: openDevelopmentView);
     });
   }
 
@@ -35,10 +39,16 @@ class _DashboardHomeState extends State<DashboardHome> {
     });
   }
 
-
   void openSettings(BuildContext context) {
     setState(() {
       selectedWidget = Settings();
+    });
+  }
+
+  // Possible refactor this later to make the development-view make a http call.
+  void openDevelopmentView(BuildContext context, DevelopmentDTO developmentDTO) {
+    setState(() {
+      selectedWidget = DevelopmentViewV2(developmentDTO: developmentDTO);
     });
   }
 
