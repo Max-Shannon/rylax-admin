@@ -26,7 +26,6 @@ class DevelopmentsHome extends StatelessWidget {
         }
 
         final developments = snapshot.data?.developments;
-
         return GridView.builder(
           padding: const EdgeInsets.all(16),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -41,8 +40,6 @@ class DevelopmentsHome extends StatelessWidget {
             return DevelopmentCard(
               dev: dev,
               onTap: () {
-                // TODO: navigate to development detail / properties list
-                // Navigator.push(...);
                 openDevelopmentView(context, dev);
               },
             );

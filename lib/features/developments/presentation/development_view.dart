@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:rylax_admin/core/network/models/development_dto.dart';
-import 'package:rylax_admin/core/network/models/property_dto.dart';
 import 'package:rylax_admin/core/utils/font_size_utils.dart';
 import 'package:rylax_admin/core/widgets/app_icon_button.dart';
 import 'package:rylax_admin/core/widgets/app_text.dart';

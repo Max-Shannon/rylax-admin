@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:rylax_admin/core/network/models/development_dto.dart';
+import 'package:rylax_admin/core/services/rylax_api_service.dart';
 import 'package:rylax_admin/core/utils/font_size_utils.dart';
 import 'package:rylax_admin/core/widgets/app_icon_button.dart';
 import 'package:rylax_admin/core/widgets/app_text.dart';
@@ -8,9 +9,10 @@ import 'package:rylax_admin/core/widgets/app_text.dart';
 import '../../../core/styles/app_colors.dart';
 
 class DevelopmentViewV2 extends StatefulWidget {
+  final RylaxAPIService rylaxAPIService = RylaxAPIService();
   final DevelopmentDTO developmentDTO;
 
-  const DevelopmentViewV2({super.key, required this.developmentDTO});
+  DevelopmentViewV2({super.key, required this.developmentDTO});
 
   @override
   State<DevelopmentViewV2> createState() => _DevelopmentViewState();
@@ -22,13 +24,7 @@ class _DevelopmentViewState extends State<DevelopmentViewV2> {
   PlutoGridStateManager? _stateManager;
 
   // 1) Define your allowed statuses once
-  static const kBuildStatuses = <String>[
-    'Planned',
-    'In Progress',
-    'Snagging',
-    'Complete',
-    'On Hold',
-  ];
+  static const kBuildStatuses = <String>['Planned', 'In Progress', 'Snagging', 'Complete', 'On Hold'];
 
   @override
   void initState() {
@@ -91,7 +87,8 @@ class _DevelopmentViewState extends State<DevelopmentViewV2> {
         minWidth: 100,
         width: 140,
         enableContextMenu: false,
-        readOnly: false, // 👈 must be editable for the dropdown
+        readOnly: false,
+        // 👈 must be editable for the dropdown
         renderer: (ctx) {
           final value = ctx.cell.value as String?;
           return Container(
@@ -100,12 +97,12 @@ class _DevelopmentViewState extends State<DevelopmentViewV2> {
               borderRadius: BorderRadius.circular(12),
               // simple color mapping; tweak as you like
               color: switch (value) {
-                'Planned'     => const Color(0xFFE3F2FD),
+                'Planned' => const Color(0xFFE3F2FD),
                 'In Progress' => const Color(0xFFE8F5E9),
-                'Snagging'    => const Color(0xFFFFF3E0),
-                'Complete'    => const Color(0xFFE8EAF6),
-                'On Hold'     => const Color(0xFFFFEBEE),
-                _             => Colors.grey.shade200,
+                'Snagging' => const Color(0xFFFFF3E0),
+                'Complete' => const Color(0xFFE8EAF6),
+                'On Hold' => const Color(0xFFFFEBEE),
+                _ => Colors.grey.shade200,
               },
             ),
             child: Text(value ?? '', style: const TextStyle(fontSize: 12)),
@@ -157,8 +154,10 @@ class _DevelopmentViewState extends State<DevelopmentViewV2> {
       PlutoColumn(
         title: 'Actions',
         field: 'actions',
-        type: PlutoColumnType.text(),   // <- not number; we render custom UI
-        enableSorting: false,           // actions shouldn't sort
+        type: PlutoColumnType.text(),
+        // <- not number; we render custom UI
+        enableSorting: false,
+        // actions shouldn't sort
         readOnly: true,
         enableContextMenu: false,
         minWidth: 160,
@@ -166,8 +165,8 @@ class _DevelopmentViewState extends State<DevelopmentViewV2> {
         renderer: (ctx) {
           // Grab whatever you need from the row:
           final propertyType = ctx.row.cells['propertyType']?.value;
-          final phaseName    = ctx.row.cells['phaseName']?.value;
-          final phaseNumber  = ctx.row.cells['phaseNumber']?.value;
+          final phaseName = ctx.row.cells['phaseName']?.value;
+          final phaseNumber = ctx.row.cells['phaseNumber']?.value;
 
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -183,11 +182,7 @@ class _DevelopmentViewState extends State<DevelopmentViewV2> {
               ),
               Tooltip(
                 message: 'Edit',
-                child: IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () => _onEdit(ctx.row),
-                  visualDensity: VisualDensity.compact,
-                ),
+                child: IconButton(icon: const Icon(Icons.edit), onPressed: () => _onEdit(ctx.row), visualDensity: VisualDensity.compact),
               ),
               Tooltip(
                 message: 'Upload file',
@@ -214,14 +209,13 @@ class _DevelopmentViewState extends State<DevelopmentViewV2> {
           );
         },
       ),
-
     ];
 
     _rows = _extractRows(widget.developmentDTO);
   }
 
   void _onOpen(PlutoRow row) {
-    final phaseName   = row.cells['phaseName']?.value;
+    final phaseName = row.cells['phaseName']?.value;
     final phaseNumber = row.cells['phaseNumber']?.value;
     // TODO: navigate to details page
     debugPrint('Open -> $phaseName #$phaseNumber');
@@ -259,7 +253,6 @@ class _DevelopmentViewState extends State<DevelopmentViewV2> {
     // TODO: backend call
     debugPrint('Archive -> ${row.cells['phaseName']?.value}');
   }
-
 
   List<PlutoRow> _extractRows(DevelopmentDTO dto) {
     final out = <PlutoRow>[];
@@ -303,6 +296,8 @@ class _DevelopmentViewState extends State<DevelopmentViewV2> {
             const SizedBox(height: 30),
             Row(
               children: [
+                AppText(textValue: "Phases: ${_rows.length}", fontSize: subtitleSize),
+                const SizedBox(width: 20),
                 AppText(textValue: "Properties: ${_rows.length}", fontSize: subtitleSize),
                 const SizedBox(width: 20),
                 AppText(textValue: "Buyers: 14", fontSize: subtitleSize), // TODO: wire real values
@@ -315,6 +310,8 @@ class _DevelopmentViewState extends State<DevelopmentViewV2> {
             const SizedBox(height: 20),
             Row(
               children: const [
+                AppIconButton(icon: Icons.add, label: "Add Phase", onPressed: ,),
+                SizedBox(width: 20),
                 AppIconButton(icon: Icons.add, label: "Add Property"),
                 SizedBox(width: 20),
                 AppIconButton(
@@ -351,11 +348,7 @@ class _DevelopmentViewState extends State<DevelopmentViewV2> {
                     onChanged: (event) {
                       // Row edits if you enable editing later.
                     },
-                    configuration: const PlutoGridConfiguration(
-                      style: PlutoGridStyleConfig(
-
-                      ),
-                    ), // defaults: sortable + resizable columns
+                    configuration: const PlutoGridConfiguration(style: PlutoGridStyleConfig()), // defaults: sortable + resizable columns
                   ),
                 ),
               ),
