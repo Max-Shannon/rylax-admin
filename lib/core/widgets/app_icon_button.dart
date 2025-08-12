@@ -6,7 +6,7 @@ import '../styles/app_colors.dart';
 class AppIconButton extends StatelessWidget {
   final IconData icon;
   final String label;
-  final VoidCallback? onPressed;
+  final Function onPressed;
 
   /// Tweakables (optional)
   final double borderRadius;
@@ -18,11 +18,11 @@ class AppIconButton extends StatelessWidget {
     super.key,
     required this.icon,
     required this.label,
-    this.onPressed,
     this.borderRadius = 2, // "slightly rounded"
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     this.backgroundColor = AppColors.mainGreen,
     this.foregroundColor = AppColors.mainWhite,
+    required this.onPressed,
   });
 
   @override
@@ -31,7 +31,7 @@ class AppIconButton extends StatelessWidget {
       width: 200,
       height: 50,
       child: TextButton.icon(
-        onPressed: () {},
+        onPressed: () => onPressed(),
         icon: Icon(icon), // <-- change me
         label: Text(label), // <-- and me
         style: TextButton.styleFrom(

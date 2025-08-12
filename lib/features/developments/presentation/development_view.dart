@@ -1,96 +1,151 @@
 import 'package:flutter/material.dart';
+import 'package:pluto_grid/pluto_grid.dart';
 import 'package:rylax_admin/core/network/models/development_dto.dart';
+import 'package:rylax_admin/core/services/rylax_api_service.dart';
 import 'package:rylax_admin/core/utils/font_size_utils.dart';
 import 'package:rylax_admin/core/widgets/app_icon_button.dart';
 import 'package:rylax_admin/core/widgets/app_text.dart';
+import 'package:rylax_admin/features/developments/presentation/widgets/development_dialogs.dart';
+import 'package:rylax_admin/features/developments/presentation/widgets/property_table_columns.dart';
 
 import '../../../core/styles/app_colors.dart';
 
-class DevelopmentView extends StatelessWidget {
+class DevelopmentView extends StatefulWidget {
+  final RylaxAPIService rylaxAPIService = RylaxAPIService();
   final DevelopmentDTO developmentDTO;
 
-  const DevelopmentView({super.key, required this.developmentDTO});
+  DevelopmentView({super.key, required this.developmentDTO});
 
-  void doNothing() {}
+  @override
+  State<DevelopmentView> createState() => _DevelopmentViewState();
+}
+
+class _DevelopmentViewState extends State<DevelopmentView> {
+  late final List<PlutoColumn> _columns;
+  late final List<PlutoRow> _rows;
+  PlutoGridStateManager? _stateManager;
+
+  @override
+  void initState() {
+    super.initState();
+    _columns = PropertyTableColumns().getDefaultColumns();
+    _rows = _extractRows(widget.developmentDTO);
+  }
+
+  void showCreateDevelopmentPhaseDialog(BuildContext context) {
+    DevelopmentDialogs.showCreateDevelopmentPhaseDialog(context);
+  }
+
+  void showCreatePropertyDialog(BuildContext context) {
+    DevelopmentDialogs.showCreatePropertyDialog(context);
+  }
+
+  void doNothing() {
+    print("doing nothing");
+  }
 
   @override
   Widget build(BuildContext context) {
-    double headingSize = FontSizeUtils.determineHeadingSize(context);
-    double subtitleSize = FontSizeUtils.determineSubtitleSize(context);
+    final headingSize = FontSizeUtils.determineHeadingSize(context);
+    final subtitleSize = FontSizeUtils.determineSubtitleSize(context);
+
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             Align(
               alignment: Alignment.centerLeft,
-              child: AppText(textValue: developmentDTO.developmentName, fontSize: headingSize),
+              child: AppText(textValue: widget.developmentDTO.developmentName, fontSize: headingSize),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             Row(
               children: [
-                AppText(textValue: "Properties: 20", fontSize: subtitleSize),
-                SizedBox(width: 20),
+                AppText(textValue: "Phases: ${_rows.length}", fontSize: subtitleSize),
+                const SizedBox(width: 20),
+                AppText(textValue: "Properties: ${_rows.length}", fontSize: subtitleSize),
+                const SizedBox(width: 20),
                 AppText(textValue: "Buyers: 14", fontSize: subtitleSize),
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 AppText(textValue: "Verified Buyers: 9", fontSize: subtitleSize),
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 AppText(textValue: "Status: Active", fontSize: subtitleSize),
-                SizedBox(width: 20),
               ],
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Row(
               children: [
-                AppIconButton(icon: Icons.add, label: "Add Property"),
-                SizedBox(width: 20),
+                AppIconButton(icon: Icons.add, label: "Add Phase", onPressed: () => showCreateDevelopmentPhaseDialog(context)),
+                const SizedBox(width: 20),
+                AppIconButton(icon: Icons.add, label: "Add Property", onPressed: () => showCreatePropertyDialog(context)),
+                const SizedBox(width: 20),
                 AppIconButton(
                   icon: Icons.add_chart,
                   label: "View Snags",
                   foregroundColor: AppColors.mainGreen,
                   backgroundColor: AppColors.mainWhite,
+                  onPressed: () => doNothing(),
                 ),
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 AppIconButton(
                   icon: Icons.upload,
                   label: "Upload File",
                   foregroundColor: AppColors.mainGreen,
                   backgroundColor: AppColors.mainWhite,
+                  onPressed: () => doNothing(),
                 ),
-                SizedBox(width: 20),
               ],
             ),
-            Column(children: extractRowTextWidgets(developmentDTO)),
+            const SizedBox(height: 16),
+            Expanded(
+              child: Card(
+                elevation: 1,
+                color: AppColors.mainWhite,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: PlutoGrid(
+                    columns: _columns,
+                    rows: _rows,
+                    onLoaded: (event) {
+                      _stateManager = event.stateManager;
+                    },
+                    onChanged: (event) {
+                      // Row edits if you enable editing later.
+                    },
+                    configuration: const PlutoGridConfiguration(style: PlutoGridStyleConfig()), // defaults: sortable + resizable columns
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  List<Widget> extractRowTextWidgets(DevelopmentDTO developmentDTO) {
-    List<Widget> textWidgets = [];
-    var developmentPhases = developmentDTO.developmentPhases;
-
-    for (var developmentPhase in developmentPhases) {
-      for (var property in developmentPhase.properties) {
-        var row = TableRow(property.propertyType, developmentPhase.phaseName, developmentPhase.phaseNumber);
-        textWidgets.add(Text(row.toString(), style: const TextStyle(fontSize: 16)));
+  List<PlutoRow> _extractRows(DevelopmentDTO dto) {
+    final out = <PlutoRow>[];
+    for (final phase in dto.developmentPhases) {
+      for (final property in phase.properties) {
+        out.add(
+          PlutoRow(
+            cells: {
+              'houseNumber': PlutoCell(value: "17"),
+              'assignmentStatus': PlutoCell(value: "Assigned"),
+              'buyerAssignment': PlutoCell(value: "Robert Earls"),
+              'buildStatus': PlutoCell(value: "Key Handover"),
+              'saleStatus': PlutoCell(value: "Closing"),
+              'propertyType': PlutoCell(value: property.propertyType),
+              'phaseName': PlutoCell(value: phase.phaseName),
+              'phaseNumber': PlutoCell(value: phase.phaseNumber),
+              'actions': PlutoCell(value: "Todo"),
+            },
+          ),
+        );
       }
     }
-    return textWidgets;
-  }
-}
-
-class TableRow {
-  late String propertyType;
-  late String phaseName;
-  late int phaseNumber;
-
-  TableRow(this.propertyType, this.phaseName, this.phaseNumber);
-
-  @override
-  String toString() {
-    return 'TableRow{propertyType: $propertyType, phaseName: $phaseName, phaseNumber: $phaseNumber}';
+    return out;
   }
 }
