@@ -30,6 +30,10 @@ class ValidationUtils {
     return true;
   }
 
+  static bool validateNotEmpty(String string) {
+    return string.isNotEmpty;
+  }
+
   static bool validateEmail(String email) {
     return EmailValidator.validate(email);
   }

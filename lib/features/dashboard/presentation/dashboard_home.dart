@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+import 'package:provider/provider.dart';
 import 'package:rylax_admin/core/network/models/development_dto.dart';
 import 'package:rylax_admin/core/styles/app_colors.dart';
 import 'package:rylax_admin/core/utils/screen_size_utils.dart';
@@ -8,6 +10,7 @@ import 'package:rylax_admin/features/dashboard/presentation/dashboard_data.dart'
 import 'package:rylax_admin/features/developments/presentation/developments_home.dart';
 import 'package:rylax_admin/features/settings/settings.dart';
 
+import '../../../core/app-state/app_state.dart';
 import '../../developments/presentation/development_view.dart';
 
 class DashboardHome extends StatefulWidget {
@@ -28,6 +31,8 @@ class _DashboardHomeState extends State<DashboardHome> {
 
   void openDevelopments(BuildContext context) {
     setState(() {
+      context.read<AppState>().setView(AppView.developmentsView);
+
       selectedWidget = DevelopmentsHome(openDevelopmentView: openDevelopmentView);
     });
   }
@@ -47,6 +52,7 @@ class _DashboardHomeState extends State<DashboardHome> {
   // Possible refactor this later to make the development-view make a http call.
   void openDevelopmentView(BuildContext context, DevelopmentDTO developmentDTO) {
     setState(() {
+      context.read<AppState>().setView(AppView.developmentView);
       selectedWidget = DevelopmentView(developmentDTO: developmentDTO);
     });
   }

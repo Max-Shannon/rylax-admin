@@ -20,6 +20,11 @@ class AppFormSubmitButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: () => function(),
         style: ButtonStyle(
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(2), // try 4–8 for subtle rounding
+            ),
+          ),
           backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
             if (states.contains(WidgetState.hovered)) {
               return AppColors.mainGreenHoovered;

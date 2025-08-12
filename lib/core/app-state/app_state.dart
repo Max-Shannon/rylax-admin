@@ -22,6 +22,8 @@ enum AppView {
   login,
   forgotPassword,
   dashboardHome,
+  developmentsView,
+  developmentView,
   tcs,
 }
 

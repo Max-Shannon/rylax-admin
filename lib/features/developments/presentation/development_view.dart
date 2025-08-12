@@ -5,6 +5,7 @@ import 'package:rylax_admin/core/services/rylax_api_service.dart';
 import 'package:rylax_admin/core/utils/font_size_utils.dart';
 import 'package:rylax_admin/core/widgets/app_icon_button.dart';
 import 'package:rylax_admin/core/widgets/app_text.dart';
+import 'package:rylax_admin/features/developments/presentation/widgets/create_property_dialog.dart';
 import 'package:rylax_admin/features/developments/presentation/widgets/development_dialogs.dart';
 import 'package:rylax_admin/features/developments/presentation/widgets/property_table_columns.dart';
 
@@ -37,7 +38,12 @@ class _DevelopmentViewState extends State<DevelopmentView> {
   }
 
   void showCreatePropertyDialog(BuildContext context) {
-    DevelopmentDialogs.showCreatePropertyDialog(context);
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CreatePropertyDialog();
+      },
+    );
   }
 
   void doNothing() {
