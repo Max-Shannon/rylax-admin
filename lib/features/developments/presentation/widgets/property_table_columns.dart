@@ -49,8 +49,8 @@ class PropertyTableColumns {
   getDefaultColumns() {
     return [
       PlutoColumn(
-        title: 'House No.',
-        field: 'houseNumber',
+        title: 'Unit Type',
+        field: 'unitType',
         type: PlutoColumnType.text(),
         enableSorting: true,
         // click header to sort
@@ -61,8 +61,8 @@ class PropertyTableColumns {
         readOnly: true,
       ),
       PlutoColumn(
-        title: 'Status',
-        field: 'assignmentStatus',
+        title: 'Property Style',
+        field: 'propertyStyle',
         type: PlutoColumnType.text(),
         enableSorting: true,
         // click header to sort
@@ -73,8 +73,8 @@ class PropertyTableColumns {
         readOnly: true,
       ),
       PlutoColumn(
-        title: 'Buyer Assigned',
-        field: 'buyerAssignment',
+        title: 'Buyer',
+        field: 'buyerAssigned',
         type: PlutoColumnType.text(),
         enableSorting: true,
         // click header to sort
@@ -84,6 +84,38 @@ class PropertyTableColumns {
         enableContextMenu: false,
         readOnly: true,
       ),
+
+      PlutoColumn(
+        title: 'Sale Status',
+        field: 'saleStatus',
+        type: PlutoColumnType.select(kBuildStatuses),
+        enableSorting: true,
+        minWidth: 100,
+        width: 140,
+        enableContextMenu: false,
+        readOnly: false,
+        // 👈 must be editable for the dropdown
+        renderer: (ctx) {
+          final value = ctx.cell.value as String?;
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              // simple color mapping; tweak as you like
+              color: switch (value) {
+                'Planned' => const Color(0xFFE3F2FD),
+                'In Progress' => const Color(0xFFE8F5E9),
+                'Snagging' => const Color(0xFFFFF3E0),
+                'Complete' => const Color(0xFFE8EAF6),
+                'On Hold' => const Color(0xFFFFEBEE),
+                _ => Colors.grey.shade200,
+              },
+            ),
+            child: Text(value ?? '', style: const TextStyle(fontSize: 12)),
+          );
+        },
+      ),
+
       PlutoColumn(
         title: 'Build Status',
         field: 'buildStatus',
@@ -115,17 +147,6 @@ class PropertyTableColumns {
         },
       ),
       PlutoColumn(
-        title: 'Sale Status',
-        field: 'saleStatus',
-        type: PlutoColumnType.text(),
-        enableSorting: true,
-        // click header to sort
-        minWidth: 140,
-        // user can drag to resize in UI
-        enableContextMenu: false,
-        readOnly: true,
-      ),
-      PlutoColumn(
         title: 'Property Type',
         field: 'propertyType',
         type: PlutoColumnType.text(),
@@ -154,7 +175,36 @@ class PropertyTableColumns {
         enableContextMenu: false,
         readOnly: true,
       ),
-
+      PlutoColumn(
+        title: 'Beds',
+        field: 'bedsNumber',
+        type: PlutoColumnType.number(),
+        enableSorting: true,
+        minWidth: 120,
+        width: 120,
+        enableContextMenu: false,
+        readOnly: true,
+      ),
+      PlutoColumn(
+        title: 'Baths',
+        field: 'bathsNumber',
+        type: PlutoColumnType.number(),
+        enableSorting: true,
+        minWidth: 120,
+        width: 120,
+        enableContextMenu: false,
+        readOnly: true,
+      ),
+      PlutoColumn(
+        title: 'Sqm',
+        field: 'squareMeters',
+        type: PlutoColumnType.number(),
+        enableSorting: true,
+        minWidth: 120,
+        width: 120,
+        enableContextMenu: false,
+        readOnly: true,
+      ),
       PlutoColumn(
         title: 'Actions',
         field: 'actions',

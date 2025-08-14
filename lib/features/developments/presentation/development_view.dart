@@ -143,14 +143,17 @@ class _DevelopmentViewState extends State<DevelopmentView> {
         out.add(
           PlutoRow(
             cells: {
-              'houseNumber': PlutoCell(value: "17"),
-              'assignmentStatus': PlutoCell(value: "Assigned"),
-              'buyerAssignment': PlutoCell(value: "Robert Earls"),
-              'buildStatus': PlutoCell(value: "Key Handover"),
-              'saleStatus': PlutoCell(value: "Closing"),
+              'unitType': PlutoCell(value: property.unitType),
+              'propertyStyle': PlutoCell(value: property.propertyStyle),
+              'buyerAssigned': PlutoCell(value: property.assignedBuyerId),
+              'saleStatus': PlutoCell(value: property.saleStatus),
+              'buildStatus': PlutoCell(value: property.buildStatus),
               'propertyType': PlutoCell(value: property.propertyType),
               'phaseName': PlutoCell(value: phase.phaseName),
               'phaseNumber': PlutoCell(value: phase.phaseNumber),
+              'bedsNumber': PlutoCell(value: property.beds),
+              'bathsNumber': PlutoCell(value: property.baths),
+              'squareMeters': PlutoCell(value: property.sqm),
               'actions': PlutoCell(value: "Todo"),
             },
           ),
