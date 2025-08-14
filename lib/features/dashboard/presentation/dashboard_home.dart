@@ -11,7 +11,9 @@ import 'package:rylax_admin/features/developments/presentation/developments_home
 import 'package:rylax_admin/features/settings/settings.dart';
 
 import '../../../core/app-state/app_state.dart';
+import '../../commercial/commercial_properties.dart';
 import '../../developments/presentation/development_view.dart';
+import '../../valuation/valuation_tool.dart';
 
 class DashboardHome extends StatefulWidget {
   const DashboardHome({super.key});
@@ -40,6 +42,18 @@ class _DashboardHomeState extends State<DashboardHome> {
   void openBuyers(BuildContext context) {
     setState(() {
       selectedWidget = BuyersHome();
+    });
+  }
+
+  void openCommercial(BuildContext context) {
+    setState(() {
+      selectedWidget = CommercialProperties();
+    });
+  }
+
+  void openValuationTool(BuildContext context) {
+    setState(() {
+      selectedWidget = ValuationTool();
     });
   }
 
@@ -80,6 +94,10 @@ class _DashboardHomeState extends State<DashboardHome> {
                 AppButtonWithIcon(buttonText: "Dashboard", onPressed: () => openDashboard(context), icon: Icons.dashboard),
                 SizedBox(height: 10),
                 AppButtonWithIcon(buttonText: "Developments", onPressed: () => openDevelopments(context), icon: Icons.house),
+                SizedBox(height: 10),
+                AppButtonWithIcon(buttonText: "Commercial", onPressed: () => openCommercial(context), icon: Icons.house_siding),
+                SizedBox(height: 10),
+                AppButtonWithIcon(buttonText: "Valuation Tool", onPressed: () => openValuationTool(context), icon: Icons.attach_money),
                 SizedBox(height: 10),
                 AppButtonWithIcon(buttonText: "Buyers", onPressed: () => openBuyers(context), icon: Icons.people),
                 SizedBox(height: 10),

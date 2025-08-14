@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:rylax_admin/core/network/models/create_development_phase_request.dart';
+import 'package:rylax_admin/core/network/models/create_property_request.dart';
 import 'package:rylax_admin/core/network/models/development_response.dart';
+import 'package:rylax_admin/core/network/models/property_dto.dart';
 import 'package:rylax_admin/core/services/auth_service.dart';
 
 class RylaxAPIClient {
@@ -20,12 +22,12 @@ class RylaxAPIClient {
       final Map<String, dynamic> jsonMap = json.decode(response.body);
       return DevelopmentResponse.fromJson(jsonMap);
     } else {
-      throw Exception('Failed to create buyer profile. Status: ${response.statusCode}');
+      throw Exception('Status: ${response.statusCode}');
     }
   }
 
   Future<void> createDevelopmentPhase(int developmentId, CreateDevelopmentPhaseRequest createDevelopmentPhaseRequest) async {
-    final uri = Uri.parse("$baseUrl/$developmentId/development-phase");
+    final uri = Uri.parse("$baseUrl/developments/$developmentId/development-phase");
     final body = json.encode(createDevelopmentPhaseRequest.toJson());
     final token = await authService.getFirebaseToken();
 
@@ -35,8 +37,27 @@ class RylaxAPIClient {
       body: body,
     );
 
-    if (response.statusCode != 201) {
+    if (response.statusCode != 200) {
       throw Exception('Failed to create development-phase. Status: ${response.statusCode}');
+    }
+  }
+
+  Future<PropertyDTO> createProperty(int developmentPhaseId, CreatePropertyRequest createPropertyRequest) async {
+    final uri = Uri.parse("$baseUrl/properties/$developmentPhaseId");
+    final body = json.encode(createPropertyRequest.toJson());
+    final token = await authService.getFirebaseToken();
+
+    final response = await http.post(
+      uri,
+      headers: {'Content-Type': 'application/json; charset=UTF-8', 'Authorization': ?token},
+      body: body,
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonMap = json.decode(response.body);
+      return PropertyDTO.fromJson(jsonMap);
+    } else {
+      throw Exception('Failed to create buyer profile. Status: ${response.statusCode}');
     }
   }
 }

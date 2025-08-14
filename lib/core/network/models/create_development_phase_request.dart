@@ -5,7 +5,7 @@ part 'create_development_phase_request.g.dart';
 @JsonSerializable()
 class CreateDevelopmentPhaseRequest {
   late final String phaseName;
-  late final String phaseNumber;
+  late final int phaseNumber;
   late final DateTime phaseEstimatedStartDate;
   late final DateTime phaseEstimatedEndDate;
 

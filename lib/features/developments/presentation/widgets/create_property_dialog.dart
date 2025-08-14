@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:rylax_admin/core/network/models/create_property_request.dart';
+import 'package:rylax_admin/core/services/rylax_api_service.dart';
 import 'package:rylax_admin/core/styles/app_colors.dart';
 import 'package:rylax_admin/core/utils/validation_utils.dart';
 
@@ -16,6 +18,8 @@ class CreatePropertyDialog extends StatefulWidget {
 }
 
 class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
+  final RylaxAPIService rylaxAPIService = RylaxAPIService();
+
   TextEditingController propertyNumberController = TextEditingController();
   TextEditingController phaseSelectorController = TextEditingController();
   TextEditingController bedController = TextEditingController();
@@ -65,15 +69,20 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
     });
   }
 
-  void onSubmit() {
+  Future<void> onSubmit() async {
     bool propertyNumberSelected = ValidationUtils.validateNotEmpty(propertyNumberController.text);
     bool phaseSelected = ValidationUtils.validateNotEmpty(phaseSelectorController.text);
     bool bedsSelected = ValidationUtils.validateNotEmpty(bedController.text);
     bool bathsSelected = ValidationUtils.validateNotEmpty(bathsController.text);
     bool unitNameSelected = ValidationUtils.validateNotEmpty(unitNameController.text);
     bool unitCountSelected = ValidationUtils.validateNotEmpty(unitCountController.text);
+
+    var propertyType = "NEW_BUILD_NEW";
+    var createPropertyRequest = CreatePropertyRequest(propertyType);
+    await rylaxAPIService.createProperty(100005, createPropertyRequest);
+
     if (propertyNumberSelected && phaseSelected && bedsSelected && bathsSelected && unitNameSelected && unitCountSelected) {
-      //TODO:
+    //TODO:
     } else {
       refreshState(
         propertyNumberValidatedFailed,

@@ -55,7 +55,7 @@ class PropertyTableColumns {
         enableSorting: true,
         // click header to sort
         minWidth: 40,
-        width: 100,
+        width: 120,
         // user can drag to resize in UI
         enableContextMenu: false,
         readOnly: true,
@@ -67,7 +67,7 @@ class PropertyTableColumns {
         enableSorting: true,
         // click header to sort
         minWidth: 40,
-        width: 100,
+        width: 120,
         // user can drag to resize in UI
         enableContextMenu: false,
         readOnly: true,
@@ -79,7 +79,7 @@ class PropertyTableColumns {
         enableSorting: true,
         // click header to sort
         minWidth: 40,
-        width: 100,
+        width: 120,
         // user can drag to resize in UI
         enableContextMenu: false,
         readOnly: true,
@@ -130,7 +130,6 @@ class PropertyTableColumns {
         field: 'propertyType',
         type: PlutoColumnType.text(),
         enableSorting: true,
-        // click header to sort
         minWidth: 140,
         // user can drag to resize in UI
         enableContextMenu: false,
@@ -150,8 +149,8 @@ class PropertyTableColumns {
         field: 'phaseNumber',
         type: PlutoColumnType.number(),
         enableSorting: true,
-        minWidth: 65,
-        width: 65,
+        minWidth: 120,
+        width: 120,
         enableContextMenu: false,
         readOnly: true,
       ),
@@ -165,8 +164,8 @@ class PropertyTableColumns {
         // actions shouldn't sort
         readOnly: true,
         enableContextMenu: false,
-        minWidth: 160,
-        width: 180,
+        minWidth: 120,
+        width: 120,
         renderer: (ctx) {
           // Grab whatever you need from the row:
           final propertyType = ctx.row.cells['propertyType']?.value;

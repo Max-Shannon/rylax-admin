@@ -10,7 +10,7 @@ CreateDevelopmentPhaseRequest _$CreateDevelopmentPhaseRequestFromJson(
   Map<String, dynamic> json,
 ) => CreateDevelopmentPhaseRequest(
   json['phaseName'] as String,
-  json['phaseNumber'] as String,
+  (json['phaseNumber'] as num).toInt(),
   DateTime.parse(json['phaseEstimatedStartDate'] as String),
   DateTime.parse(json['phaseEstimatedEndDate'] as String),
 );
