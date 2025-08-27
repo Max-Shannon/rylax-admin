@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:rylax_admin/core/network/models/create_property_request.dart';
+import 'package:rylax_admin/core/network/models/development_dto.dart';
 import 'package:rylax_admin/core/services/rylax_api_service.dart';
 import 'package:rylax_admin/core/styles/app_colors.dart';
 import 'package:rylax_admin/core/utils/validation_utils.dart';
+import 'package:rylax_admin/features/developments/presentation/widgets/phase_dropdown.dart';
 
 import '../../../../core/utils/font_size_utils.dart';
 import '../../../../core/utils/screen_size_utils.dart';
@@ -11,7 +13,9 @@ import '../../../../core/widgets/app_text.dart';
 import '../../../../core/widgets/app_text_input_with_title.dart';
 
 class CreatePropertyDialog extends StatefulWidget {
-  const CreatePropertyDialog({super.key});
+  final DevelopmentDTO developmentDTO;
+
+  const CreatePropertyDialog({super.key, required this.developmentDTO});
 
   @override
   State<CreatePropertyDialog> createState() => _CreatePropertyDialogState();
@@ -33,6 +37,8 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
   bool bathsValidatedFailed = false;
   bool unitNameValidatedFailed = false;
   bool unitCountValidatedFailed = false;
+
+  int? _selectedPhaseId;
 
   @override
   void initState() {
@@ -76,13 +82,16 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
     bool bathsSelected = ValidationUtils.validateNotEmpty(bathsController.text);
     bool unitNameSelected = ValidationUtils.validateNotEmpty(unitNameController.text);
     bool unitCountSelected = ValidationUtils.validateNotEmpty(unitCountController.text);
+    //TODO:
+    print(" create property - phase selected = $_selectedPhaseId", );
 
-    var propertyType = "NEW_BUILD_NEW";
-    var createPropertyRequest = CreatePropertyRequest(propertyType);
-    await rylaxAPIService.createProperty(100005, createPropertyRequest);
+    // var propertyType = "NEW_BUILD_NEW";
+    // var createPropertyRequest = CreatePropertyRequest(propertyType);
+    // await rylaxAPIService.createProperty(100005, createPropertyRequest);
 
     if (propertyNumberSelected && phaseSelected && bedsSelected && bathsSelected && unitNameSelected && unitCountSelected) {
-    //TODO:
+      //TODO:
+      print(" create property - phase selected = $_selectedPhaseId", );
     } else {
       refreshState(
         propertyNumberValidatedFailed,
@@ -123,12 +132,17 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
                 title: "Property Number",
               ),
               const SizedBox(height: 16),
-              AppTextInputWithTitle(
-                inputFailedValidation: phaseValidatedFailed,
-                textEditingController: phaseSelectorController,
-                validationFailedMessage: "Please enter a valid name",
-                title: "Phase Selector",
+
+              // This needs to be a drop-down based on the phases set out for this development.
+              PhaseDropdown(
+                phases: widget.developmentDTO.developmentPhases,
+                onChanged: (int? id) {
+                  setState(() => _selectedPhaseId = id);
+                  // call your API with the chosen id
+                  // await apiClient.assignPhase(id!);
+                },
               ),
+
               const SizedBox(height: 16),
 
               AppTextInputWithTitle(

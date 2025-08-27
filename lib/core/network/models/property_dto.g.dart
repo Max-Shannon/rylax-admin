@@ -8,7 +8,7 @@ part of 'property_dto.dart';
 
 PropertyDTO _$PropertyDTOFromJson(Map<String, dynamic> json) => PropertyDTO(
   (json['id'] as num).toInt(),
-  (json['assignedBuyerId'] as num).toInt(),
+  (json['assignedBuyerId'] as num?)?.toInt(),
   json['propertyType'] as String,
   json['propertyStyle'] as String,
   json['unitType'] as String,

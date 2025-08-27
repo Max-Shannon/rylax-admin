@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
+import 'package:rylax_admin/core/styles/app_text_styles.dart';
+import 'package:rylax_admin/core/widgets/app_icon_button.dart';
 
 class PropertyTableColumns {
   PlutoGridStateManager? _stateManager;
 
-  static const kBuildStatuses = <String>['Planned', 'In Progress', 'Snagging', 'Complete', 'On Hold'];
+  static const kBuildStatuses = <String>['Planning', 'Pre Construction', 'Groundwork and Foundations', 'Structural Build', 'First Fix', 'External Finishes', 'Second Fix', 'Internal Finishes', 'Handover Stage', 'Complete'];
+  static const kSaleStatuses = <String>['Awaiting Instruction', 'Instructed', 'Listed', 'Reserved', 'Booking Deposit Received', 'Contracts Issued', 'Snagging', 'Snagged', 'Snags Complete', 'Complete'];
+
+  void doNothing() {}
 
   void _onOpen(PlutoRow row) {
     final phaseName = row.cells['phaseName']?.value;
@@ -67,28 +72,58 @@ class PropertyTableColumns {
         enableSorting: true,
         // click header to sort
         minWidth: 40,
-        width: 120,
+        width: 180,
         // user can drag to resize in UI
         enableContextMenu: false,
         readOnly: true,
       ),
+      // PlutoColumn(
+      //   title: 'Buyer',
+      //   field: 'buyerAssigned',
+      //   type: PlutoColumnType.text(),
+      //   enableSorting: true,
+      //   // click header to sort
+      //   minWidth: 40,
+      //   width: 120,
+      //   // user can drag to resize in UI
+      //   enableContextMenu: false,
+      //   readOnly: true,
+      // ),
+
       PlutoColumn(
         title: 'Buyer',
         field: 'buyerAssigned',
         type: PlutoColumnType.text(),
         enableSorting: true,
-        // click header to sort
         minWidth: 40,
         width: 120,
-        // user can drag to resize in UI
         enableContextMenu: false,
         readOnly: true,
+        renderer: (rendererContext) {
+          final value = rendererContext.cell.value;
+
+          if (value == null || value.toString().trim().isEmpty) {
+            return GestureDetector(
+              onTap: () {
+                // TODO: your on-click logic
+                debugPrint('Add buyer clicked for row: ${rendererContext.row.key}');
+              },
+              child: AppIconButton(icon: Icons.add, label: "add", onPressed: doNothing)
+            );
+          } else {
+            return Text(
+              value.toString(),
+              overflow: TextOverflow.ellipsis,
+            );
+          }
+        },
       ),
+
 
       PlutoColumn(
         title: 'Sale Status',
         field: 'saleStatus',
-        type: PlutoColumnType.select(kBuildStatuses),
+        type: PlutoColumnType.select(kSaleStatuses),
         enableSorting: true,
         minWidth: 100,
         width: 140,
@@ -103,15 +138,20 @@ class PropertyTableColumns {
               borderRadius: BorderRadius.circular(12),
               // simple color mapping; tweak as you like
               color: switch (value) {
-                'Planned' => const Color(0xFFE3F2FD),
-                'In Progress' => const Color(0xFFE8F5E9),
-                'Snagging' => const Color(0xFFFFF3E0),
-                'Complete' => const Color(0xFFE8EAF6),
-                'On Hold' => const Color(0xFFFFEBEE),
+                'Awaiting Instruction' => const Color(0xFFE3F2FD),
+                'Instructed' => const Color(0xFFE8F5E9),
+                'Listed' => const Color(0xFFFFF3E0),
+                'Reserved' => const Color(0xFFE8EAF6),
+                'Booking Deposit Received' => const Color(0xFFFFEBEE),
+                'Contracts Issued' => const Color(0xFFE3F2FD),
+                'Snagging' => const Color(0xFFE8F5E9),
+                'Snagged' => const Color(0xFFFFF3E0),
+                'Snags Complete' => const Color(0xFFE8EAF6),
+                'Complete' => const Color(0xFFFFEBEE),
                 _ => Colors.grey.shade200,
               },
             ),
-            child: Text(value ?? '', style: const TextStyle(fontSize: 12)),
+            child: Text(value ?? '', style: AppTextStyles.defaultFontStyle(14)),
           );
         },
       ),
@@ -122,7 +162,7 @@ class PropertyTableColumns {
         type: PlutoColumnType.select(kBuildStatuses),
         enableSorting: true,
         minWidth: 100,
-        width: 140,
+        width: 180,
         enableContextMenu: false,
         readOnly: false,
         // 👈 must be editable for the dropdown
@@ -134,18 +174,25 @@ class PropertyTableColumns {
               borderRadius: BorderRadius.circular(12),
               // simple color mapping; tweak as you like
               color: switch (value) {
-                'Planned' => const Color(0xFFE3F2FD),
-                'In Progress' => const Color(0xFFE8F5E9),
-                'Snagging' => const Color(0xFFFFF3E0),
-                'Complete' => const Color(0xFFE8EAF6),
-                'On Hold' => const Color(0xFFFFEBEE),
+                'Planning' => const Color(0xFFE3F2FD),
+                'Pre Construction' => const Color(0xFFE8F5E9),
+                'Groundwork and Foundations' => const Color(0xFFFFF3E0),
+                'Structural Build' => const Color(0xFFE8EAF6),
+                'First Fix' => const Color(0xFFFFEBEE),
+                'External Finishes' => const Color(0xFFE3F2FD),
+                'Second Fix' => const Color(0xFFE8F5E9),
+                'Internal Finishes' => const Color(0xFFFFF3E0),
+                'Handover Stage' => const Color(0xFFE8EAF6),
+                'Complete' => const Color(0xFFFFEBEE),
+
                 _ => Colors.grey.shade200,
               },
             ),
-            child: Text(value ?? '', style: const TextStyle(fontSize: 12)),
+            child: Text(value ?? '', style: AppTextStyles.defaultFontStyle(14)),
           );
         },
       ),
+
       PlutoColumn(
         title: 'Property Type',
         field: 'propertyType',

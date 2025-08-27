@@ -10,7 +10,9 @@ import 'package:rylax_admin/core/services/auth_service.dart';
 class RylaxAPIClient {
   final AuthService authService = AuthService();
 
-  final String baseUrl = 'http://192.168.20.169:8080/api/v1';
+  final String baseUrl = 'http://192.168.1.132:8080/api/v1';
+
+  //final String baseUrl = 'http://10.201.55.196:8080/api/v1';
 
   Future<DevelopmentResponse> getDevelopmentsByBranchId(int branchId) async {
     final uri = Uri.parse("$baseUrl/developments?branchId=$branchId");
@@ -57,7 +59,7 @@ class RylaxAPIClient {
       final Map<String, dynamic> jsonMap = json.decode(response.body);
       return PropertyDTO.fromJson(jsonMap);
     } else {
-      throw Exception('Failed to create buyer profile. Status: ${response.statusCode}');
+      throw Exception('Failed to create property. Status: ${response.statusCode}');
     }
   }
 }

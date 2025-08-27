@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:rylax_admin/core/network/models/development_dto.dart';
 import 'package:rylax_admin/core/services/rylax_api_service.dart';
+import 'package:rylax_admin/core/styles/app_text_styles.dart';
 import 'package:rylax_admin/core/utils/font_size_utils.dart';
 import 'package:rylax_admin/core/widgets/app_icon_button.dart';
 import 'package:rylax_admin/core/widgets/app_text.dart';
@@ -46,7 +47,7 @@ class _DevelopmentViewState extends State<DevelopmentView> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return CreatePropertyDialog();
+        return CreatePropertyDialog(developmentDTO: widget.developmentDTO);
       },
     );
   }
@@ -125,7 +126,12 @@ class _DevelopmentViewState extends State<DevelopmentView> {
                     onChanged: (event) {
                       // Row edits if you enable editing later.
                     },
-                    configuration: const PlutoGridConfiguration(style: PlutoGridStyleConfig()), // defaults: sortable + resizable columns
+                    configuration:  PlutoGridConfiguration(
+                      style: PlutoGridStyleConfig(
+                        cellTextStyle:  AppTextStyles.defaultFontStyle(18),
+                        columnTextStyle: AppTextStyles.defaultFontStyle(18)
+                      ),
+                    ), // defaults: sortable + resizable columns
                   ),
                 ),
               ),

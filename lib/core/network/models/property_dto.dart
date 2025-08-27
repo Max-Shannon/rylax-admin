@@ -5,7 +5,7 @@ part 'property_dto.g.dart';
 @JsonSerializable()
 class PropertyDTO {
   late final int id;
-  late final int assignedBuyerId;
+  late final int? assignedBuyerId;
   late final String propertyType;
   late final String propertyStyle;
   late final String unitType;
