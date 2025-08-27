@@ -6,6 +6,7 @@ import 'package:rylax_admin/core/styles/app_colors.dart';
 import 'package:rylax_admin/core/utils/validation_utils.dart';
 import 'package:rylax_admin/features/developments/presentation/widgets/int_drop_down_menu.dart';
 import 'package:rylax_admin/features/developments/presentation/widgets/phase_dropdown.dart';
+import 'package:rylax_admin/features/developments/presentation/widgets/property_style_drop_down.dart';
 
 import '../../../../core/utils/font_size_utils.dart';
 import '../../../../core/utils/screen_size_utils.dart';
@@ -28,11 +29,15 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
 
   TextEditingController propertyNumberController = TextEditingController();
   TextEditingController unitTypeController = TextEditingController();
+  TextEditingController sqmController = TextEditingController();
+  TextEditingController priceController = TextEditingController();
 
-  bool propertyNumberValidatedFailed = false;
+  bool propertyStyleValidatedFailed = false;
   bool phaseValidatedFailed = false;
   bool bedsValidatedFailed = false;
   bool bathsValidatedFailed = false;
+  bool sqmValidatedFailed = false;
+  bool priceValidatedFailed = false;
   bool unitTypeValidatedFailed = false;
   bool unitCountValidatedFailed = false;
 
@@ -40,6 +45,7 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
   int? _unitCount;
   int? _bedsSelected;
   int? _bathsSelected;
+  String? _styleSelected;
 
   @override
   void initState() {
@@ -52,35 +58,56 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
     super.dispose();
   }
 
-  void refreshState(bool phaseValidated, bool bedsValidated, bool bathsValidated, bool unitNameValidated, bool unitCountValidated) {
+  void refreshState(
+    bool propertyStyleValidated,
+    bool phaseValidated,
+    bool bedsValidated,
+    bool bathsValidated,
+    bool sqmValidated,
+    bool priceValidated,
+    bool unitTypeValidated,
+    bool unitCountValidated,
+  ) {
     setState(() {
       // Reverse the boolean values so the errors don't show when the page opens.
+      propertyStyleValidatedFailed = !propertyStyleValidated;
       phaseValidatedFailed = !phaseValidated;
       bedsValidatedFailed = !bedsValidated;
       bathsValidatedFailed = !bathsValidated;
-      unitTypeValidatedFailed = !unitNameValidated;
+      sqmValidatedFailed = !sqmValidated;
+      priceValidatedFailed = !priceValidated;
+      unitTypeValidatedFailed = !unitTypeValidated;
       unitCountValidatedFailed = !unitCountValidated;
     });
   }
 
   Future<void> onSubmit() async {
     bool unitTypeSelected = ValidationUtils.validateNotEmpty(unitTypeController.text);
+    bool propertyStyleSelected = ValidationUtils.validateNotEmpty(_styleSelected!);
     bool phaseSelected = ValidationUtils.validateSelected(_selectedPhaseId!);
     bool bedsSelected = ValidationUtils.validateSelected(_bedsSelected!);
     bool bathsSelected = ValidationUtils.validateSelected(_bathsSelected!);
+    bool sqmSelected = ValidationUtils.validateNotEmpty(sqmController.text);
+    bool priceSelected = ValidationUtils.validateNotEmpty(priceController.text);
     bool unitCountSelected = ValidationUtils.validateSelected(_unitCount!);
 
-    if (phaseSelected && bedsSelected && bathsSelected && unitTypeSelected && unitCountSelected) {
-      //TODO: Commit when this is working, then refactor to include the other bits. Such as sqm, price etc.
+    if (unitTypeSelected &&
+        propertyStyleSelected &&
+        phaseSelected &&
+        bedsSelected &&
+        bathsSelected &&
+        sqmSelected &&
+        priceSelected &&
+        unitTypeSelected &&
+        unitCountSelected) {
 
       var propertyType = "NEW_BUILD";
-      var propertyStyle = "END_OF_TERRACE";
-      var sqm = 102;
-      var price = 495000;
+      var sqm = int.parse(sqmController.text);
+      var price = int.parse(priceController.text);
 
       var createPropertyRequest = CreatePropertyRequest(
         propertyType,
-        propertyStyle,
+        _styleSelected!,
         unitTypeController.text,
         _unitCount!,
         _bedsSelected!,
@@ -97,7 +124,16 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
         SnackBarz.showSnackBar(context, AppColors.mainRed, "Failed to create property, contact support");
       }
     } else {
-      refreshState(propertyNumberValidatedFailed, phaseValidatedFailed, bedsValidatedFailed, bathsValidatedFailed, unitTypeValidatedFailed);
+      refreshState(
+        propertyStyleValidatedFailed,
+        phaseValidatedFailed,
+        bedsValidatedFailed,
+        bathsValidatedFailed,
+        sqmValidatedFailed,
+        priceValidatedFailed,
+        unitTypeValidatedFailed,
+        unitCountValidatedFailed,
+      );
     }
   }
 
@@ -128,6 +164,31 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
                 validationFailedMessage: "Please enter a valid text",
                 title: "Unit Type",
               ),
+              const SizedBox(height: 16),
+
+              AppTextInputWithTitle(
+                inputFailedValidation: sqmValidatedFailed,
+                textEditingController: sqmController,
+                validationFailedMessage: "Please enter a valid text",
+                title: "Sqm",
+              ),
+              const SizedBox(height: 16),
+
+              AppTextInputWithTitle(
+                inputFailedValidation: priceValidatedFailed,
+                textEditingController: priceController,
+                validationFailedMessage: "Please enter a valid text",
+                title: "Price",
+              ),
+              const SizedBox(height: 16),
+
+              PropertyStyleDropdown(
+                label: 'Property Style',
+                selectedValue: _styleSelected,
+                required: true,
+                onChanged: (propertyStyle) => setState(() => _styleSelected = propertyStyle), // v is like 'MID_TERRACE'
+              ),
+
               const SizedBox(height: 16),
 
               // This needs to be a drop-down based on the phases set out for this development.
