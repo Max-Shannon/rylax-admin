@@ -27,10 +27,10 @@ class CreatePropertyDialog extends StatefulWidget {
 class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
   final RylaxAPIService rylaxAPIService = RylaxAPIService();
 
-  TextEditingController propertyNumberController = TextEditingController();
-  TextEditingController unitTypeController = TextEditingController();
-  TextEditingController sqmController = TextEditingController();
-  TextEditingController priceController = TextEditingController();
+  final TextEditingController propertyNumberController = TextEditingController();
+  final TextEditingController unitTypeController = TextEditingController();
+  final TextEditingController sqmController = TextEditingController();
+  final TextEditingController priceController = TextEditingController();
 
   bool propertyStyleValidatedFailed = false;
   bool phaseValidatedFailed = false;
@@ -48,28 +48,25 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
   String? _styleSelected;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void dispose() {
     propertyNumberController.dispose();
+    unitTypeController.dispose();
+    sqmController.dispose();
+    priceController.dispose();
     super.dispose();
   }
 
   void refreshState(
-    bool propertyStyleValidated,
-    bool phaseValidated,
-    bool bedsValidated,
-    bool bathsValidated,
-    bool sqmValidated,
-    bool priceValidated,
-    bool unitTypeValidated,
-    bool unitCountValidated,
-  ) {
+      bool propertyStyleValidated,
+      bool phaseValidated,
+      bool bedsValidated,
+      bool bathsValidated,
+      bool sqmValidated,
+      bool priceValidated,
+      bool unitTypeValidated,
+      bool unitCountValidated,
+      ) {
     setState(() {
-      // Reverse the boolean values so the errors don't show when the page opens.
       propertyStyleValidatedFailed = !propertyStyleValidated;
       phaseValidatedFailed = !phaseValidated;
       bedsValidatedFailed = !bedsValidated;
@@ -82,14 +79,14 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
   }
 
   Future<void> onSubmit() async {
-    bool unitTypeSelected = ValidationUtils.validateNotEmpty(unitTypeController.text);
-    bool propertyStyleSelected = ValidationUtils.validateNotEmpty(_styleSelected!);
-    bool phaseSelected = ValidationUtils.validateSelected(_selectedPhaseId!);
-    bool bedsSelected = ValidationUtils.validateSelected(_bedsSelected!);
-    bool bathsSelected = ValidationUtils.validateSelected(_bathsSelected!);
-    bool sqmSelected = ValidationUtils.validateNotEmpty(sqmController.text);
-    bool priceSelected = ValidationUtils.validateNotEmpty(priceController.text);
-    bool unitCountSelected = ValidationUtils.validateSelected(_unitCount!);
+    final bool unitTypeSelected = ValidationUtils.validateNotEmpty(unitTypeController.text);
+    final bool propertyStyleSelected = ValidationUtils.validateNotEmpty(_styleSelected!);
+    final bool phaseSelected = ValidationUtils.validateSelected(_selectedPhaseId!);
+    final bool bedsSelected = ValidationUtils.validateSelected(_bedsSelected!);
+    final bool bathsSelected = ValidationUtils.validateSelected(_bathsSelected!);
+    final bool sqmSelected = ValidationUtils.validateNotEmpty(sqmController.text);
+    final bool priceSelected = ValidationUtils.validateNotEmpty(priceController.text);
+    final bool unitCountSelected = ValidationUtils.validateSelected(_unitCount!);
 
     if (unitTypeSelected &&
         propertyStyleSelected &&
@@ -100,12 +97,11 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
         priceSelected &&
         unitTypeSelected &&
         unitCountSelected) {
+      const propertyType = 'NEW_BUILD';
+      final sqm = int.parse(sqmController.text);
+      final price = int.parse(priceController.text);
 
-      var propertyType = "NEW_BUILD";
-      var sqm = int.parse(sqmController.text);
-      var price = int.parse(priceController.text);
-
-      var createPropertyRequest = CreatePropertyRequest(
+      final createPropertyRequest = CreatePropertyRequest(
         propertyType,
         _styleSelected!,
         unitTypeController.text,
@@ -116,12 +112,12 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
         price,
       );
 
-      var success = await rylaxAPIService.createProperty(_selectedPhaseId!, createPropertyRequest);
+      final success = await rylaxAPIService.createProperty(_selectedPhaseId!, createPropertyRequest);
       if (success) {
-        Navigator.pop(context);
-        SnackBarz.showSnackBar(context, AppColors.mainGreen, "Property Created Successfully");
+        if (mounted) Navigator.pop(context);
+        if (mounted) SnackBarz.showSnackBar(context, AppColors.mainGreen, 'Property Created Successfully');
       } else {
-        SnackBarz.showSnackBar(context, AppColors.mainRed, "Failed to create property, contact support");
+        if (mounted) SnackBarz.showSnackBar(context, AppColors.mainRed, 'Failed to create property, contact support');
       }
     } else {
       refreshState(
@@ -145,81 +141,124 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
       backgroundColor: AppColors.mainWhite,
       insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 60),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Container(
-        height: ScreenSizeUtils.calculatePercentageHeight(context, 95),
-        width: ScreenSizeUtils.calculatePercentageWidth(context, 42.5),
+      child: Container
+        (
+        height: ScreenSizeUtils.calculatePercentageHeight(context, 60),
+        width: ScreenSizeUtils.calculatePercentageWidth(context, 60),
         padding: const EdgeInsets.all(24),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              AppText(textValue: "Add New Property", fontSize: headingSize),
-              const SizedBox(height: 6),
-              const SizedBox(height: 32),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final bool twoCols = constraints.maxWidth >= 720;
+            return SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  AppText(textValue: 'Add New Property', fontSize: headingSize),
+                  const SizedBox(height: 24),
 
-              AppTextInputWithTitle(
-                inputFailedValidation: unitTypeValidatedFailed,
-                textEditingController: unitTypeController,
-                validationFailedMessage: "Please enter a valid text",
-                title: "Unit Type",
+                  // Row 1: Unit Type | Unit Count
+                  _rowOrColumn(
+                    twoCols,
+                    AppTextInputWithTitle(
+                      inputFailedValidation: unitTypeValidatedFailed,
+                      textEditingController: unitTypeController,
+                      validationFailedMessage: 'Please enter a valid text',
+                      title: 'Unit Type',
+                    ),
+                    IntDropDownMenu(
+                      label: 'Unit Count',
+                      selectedNumber: _unitCount,
+                      required: true,
+                      onChanged: (n) => setState(() => _unitCount = n),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Row 2: SQM | Price
+                  _rowOrColumn(
+                    twoCols,
+                    AppTextInputWithTitle(
+                      inputFailedValidation: sqmValidatedFailed,
+                      textEditingController: sqmController,
+                      validationFailedMessage: 'Please enter a valid text',
+                      title: 'Sqm',
+                    ),
+                    AppTextInputWithTitle(
+                      inputFailedValidation: priceValidatedFailed,
+                      textEditingController: priceController,
+                      validationFailedMessage: 'Please enter a valid text',
+                      title: 'Price',
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Row 3: Property Style | Phase
+                  _rowOrColumn(
+                    twoCols,
+                    PropertyStyleDropdown(
+                      label: 'Property Style',
+                      selectedValue: _styleSelected,
+                      required: true,
+                      onChanged: (style) => setState(() => _styleSelected = style),
+                    ),
+                    PhaseDropdown(
+                      phases: widget.developmentDTO.developmentPhases,
+                      onChanged: (int? id) => setState(() => _selectedPhaseId = id),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Row 4: Beds | Baths
+                  _rowOrColumn(
+                    twoCols,
+                    IntDropDownMenu(
+                      label: 'Beds',
+                      selectedNumber: _bedsSelected,
+                      required: true,
+                      onChanged: (n) => setState(() => _bedsSelected = n),
+                    ),
+                    IntDropDownMenu(
+                      label: 'Baths',
+                      selectedNumber: _bathsSelected,
+                      required: true,
+                      onChanged: (n) => setState(() => _bathsSelected = n),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+                  AppText(textValue: 'Note: Clean up, just making functional', fontSize: 14),
+                  const SizedBox(height: 10),
+                  AppFormSubmitButton(label: 'Create', function: () => onSubmit()),
+                ],
               ),
-              const SizedBox(height: 16),
-
-              AppTextInputWithTitle(
-                inputFailedValidation: sqmValidatedFailed,
-                textEditingController: sqmController,
-                validationFailedMessage: "Please enter a valid text",
-                title: "Sqm",
-              ),
-              const SizedBox(height: 16),
-
-              AppTextInputWithTitle(
-                inputFailedValidation: priceValidatedFailed,
-                textEditingController: priceController,
-                validationFailedMessage: "Please enter a valid text",
-                title: "Price",
-              ),
-              const SizedBox(height: 16),
-
-              PropertyStyleDropdown(
-                label: 'Property Style',
-                selectedValue: _styleSelected,
-                required: true,
-                onChanged: (propertyStyle) => setState(() => _styleSelected = propertyStyle), // v is like 'MID_TERRACE'
-              ),
-
-              const SizedBox(height: 16),
-
-              // This needs to be a drop-down based on the phases set out for this development.
-              PhaseDropdown(
-                phases: widget.developmentDTO.developmentPhases,
-                onChanged: (int? id) {
-                  setState(() => _selectedPhaseId = id);
-                  // call your API with the chosen id
-                  // await apiClient.assignPhase(id!);
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              IntDropDownMenu(label: "Beds", onChanged: (bedsSelected) => setState(() => _bedsSelected = bedsSelected)),
-              const SizedBox(height: 16),
-
-              IntDropDownMenu(label: "Baths", onChanged: (bathsSelected) => setState(() => _bathsSelected = bathsSelected)),
-              const SizedBox(height: 16),
-
-              IntDropDownMenu(label: "Unit Count", onChanged: (unitCount) => setState(() => _unitCount = unitCount)),
-              const SizedBox(height: 16),
-
-              const SizedBox(height: 12),
-              AppText(textValue: "Note: Clean up, just making functional", fontSize: 14),
-              SizedBox(height: 10),
-              AppFormSubmitButton(label: "Create", function: () => onSubmit()),
-            ],
-          ),
+            );
+          },
         ),
       ),
+    );
+  }
+
+  /// Helper to render a responsive pair either as a Row (two columns)
+  /// or stacked Column (single column) with consistent spacing.
+  Widget _rowOrColumn(bool twoCols, Widget left, Widget right) {
+    if (twoCols) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: left),
+          const SizedBox(width: 50),
+          Expanded(child: right),
+        ],
+      );
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        left,
+        const SizedBox(height: 50),
+        right,
+      ],
     );
   }
 }

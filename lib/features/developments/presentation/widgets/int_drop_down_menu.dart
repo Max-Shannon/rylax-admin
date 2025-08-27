@@ -81,7 +81,7 @@ class IntDropDownMenu extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: AppText(textValue: label, fontSize: headingSize),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
         DropdownButtonFormField<int>(
           value: selectedNumber,
           items: items,
