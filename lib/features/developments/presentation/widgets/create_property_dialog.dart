@@ -4,10 +4,12 @@ import 'package:rylax_admin/core/network/models/development_dto.dart';
 import 'package:rylax_admin/core/services/rylax_api_service.dart';
 import 'package:rylax_admin/core/styles/app_colors.dart';
 import 'package:rylax_admin/core/utils/validation_utils.dart';
+import 'package:rylax_admin/features/developments/presentation/widgets/int_drop_down_menu.dart';
 import 'package:rylax_admin/features/developments/presentation/widgets/phase_dropdown.dart';
 
 import '../../../../core/utils/font_size_utils.dart';
 import '../../../../core/utils/screen_size_utils.dart';
+import '../../../../core/utils/snack_barz.dart';
 import '../../../../core/widgets/app_form_submit_button.dart';
 import '../../../../core/widgets/app_text.dart';
 import '../../../../core/widgets/app_text_input_with_title.dart';
@@ -25,20 +27,19 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
   final RylaxAPIService rylaxAPIService = RylaxAPIService();
 
   TextEditingController propertyNumberController = TextEditingController();
-  TextEditingController phaseSelectorController = TextEditingController();
-  TextEditingController bedController = TextEditingController();
-  TextEditingController bathsController = TextEditingController();
-  TextEditingController unitNameController = TextEditingController();
-  TextEditingController unitCountController = TextEditingController();
+  TextEditingController unitTypeController = TextEditingController();
 
   bool propertyNumberValidatedFailed = false;
   bool phaseValidatedFailed = false;
   bool bedsValidatedFailed = false;
   bool bathsValidatedFailed = false;
-  bool unitNameValidatedFailed = false;
+  bool unitTypeValidatedFailed = false;
   bool unitCountValidatedFailed = false;
 
   int? _selectedPhaseId;
+  int? _unitCount;
+  int? _bedsSelected;
+  int? _bathsSelected;
 
   @override
   void initState() {
@@ -48,59 +49,55 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
   @override
   void dispose() {
     propertyNumberController.dispose();
-    phaseSelectorController.dispose();
-    bedController.dispose();
-    bathsController.dispose();
-    bathsController.dispose();
-    unitCountController.dispose();
     super.dispose();
   }
 
-  void refreshState(
-    bool propertyNumberValidated,
-    bool phaseValidated,
-    bool bedsValidated,
-    bool bathsValidated,
-    bool unitNameValidated,
-    bool unitCountValidated,
-  ) {
+  void refreshState(bool phaseValidated, bool bedsValidated, bool bathsValidated, bool unitNameValidated, bool unitCountValidated) {
     setState(() {
       // Reverse the boolean values so the errors don't show when the page opens.
-      propertyNumberValidatedFailed = !propertyNumberValidated;
       phaseValidatedFailed = !phaseValidated;
       bedsValidatedFailed = !bedsValidated;
       bathsValidatedFailed = !bathsValidated;
-      unitNameValidatedFailed = !unitNameValidated;
+      unitTypeValidatedFailed = !unitNameValidated;
       unitCountValidatedFailed = !unitCountValidated;
     });
   }
 
   Future<void> onSubmit() async {
-    bool propertyNumberSelected = ValidationUtils.validateNotEmpty(propertyNumberController.text);
-    bool phaseSelected = ValidationUtils.validateNotEmpty(phaseSelectorController.text);
-    bool bedsSelected = ValidationUtils.validateNotEmpty(bedController.text);
-    bool bathsSelected = ValidationUtils.validateNotEmpty(bathsController.text);
-    bool unitNameSelected = ValidationUtils.validateNotEmpty(unitNameController.text);
-    bool unitCountSelected = ValidationUtils.validateNotEmpty(unitCountController.text);
-    //TODO:
-    print(" create property - phase selected = $_selectedPhaseId", );
+    bool unitTypeSelected = ValidationUtils.validateNotEmpty(unitTypeController.text);
+    bool phaseSelected = ValidationUtils.validateSelected(_selectedPhaseId!);
+    bool bedsSelected = ValidationUtils.validateSelected(_bedsSelected!);
+    bool bathsSelected = ValidationUtils.validateSelected(_bathsSelected!);
+    bool unitCountSelected = ValidationUtils.validateSelected(_unitCount!);
 
-    // var propertyType = "NEW_BUILD_NEW";
-    // var createPropertyRequest = CreatePropertyRequest(propertyType);
-    // await rylaxAPIService.createProperty(100005, createPropertyRequest);
+    if (phaseSelected && bedsSelected && bathsSelected && unitTypeSelected && unitCountSelected) {
+      //TODO: Commit when this is working, then refactor to include the other bits. Such as sqm, price etc.
 
-    if (propertyNumberSelected && phaseSelected && bedsSelected && bathsSelected && unitNameSelected && unitCountSelected) {
-      //TODO:
-      print(" create property - phase selected = $_selectedPhaseId", );
-    } else {
-      refreshState(
-        propertyNumberValidatedFailed,
-        phaseValidatedFailed,
-        bedsValidatedFailed,
-        bathsValidatedFailed,
-        unitNameValidatedFailed,
-        unitCountValidatedFailed,
+      var propertyType = "NEW_BUILD";
+      var propertyStyle = "END_OF_TERRACE";
+      var sqm = 102;
+      var price = 495000;
+
+      var createPropertyRequest = CreatePropertyRequest(
+        propertyType,
+        propertyStyle,
+        unitTypeController.text,
+        _unitCount!,
+        _bedsSelected!,
+        _bathsSelected!,
+        sqm,
+        price,
       );
+
+      var success = await rylaxAPIService.createProperty(_selectedPhaseId!, createPropertyRequest);
+      if (success) {
+        Navigator.pop(context);
+        SnackBarz.showSnackBar(context, AppColors.mainGreen, "Property Created Successfully");
+      } else {
+        SnackBarz.showSnackBar(context, AppColors.mainRed, "Failed to create property, contact support");
+      }
+    } else {
+      refreshState(propertyNumberValidatedFailed, phaseValidatedFailed, bedsValidatedFailed, bathsValidatedFailed, unitTypeValidatedFailed);
     }
   }
 
@@ -123,13 +120,13 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
             children: [
               AppText(textValue: "Add New Property", fontSize: headingSize),
               const SizedBox(height: 6),
-              const AppText(textValue: "Non-functional", fontSize: 14, fontWeight: FontWeight.w300),
               const SizedBox(height: 32),
+
               AppTextInputWithTitle(
-                inputFailedValidation: propertyNumberValidatedFailed,
-                textEditingController: propertyNumberController,
-                validationFailedMessage: "Please enter a valid number",
-                title: "Property Number",
+                inputFailedValidation: unitTypeValidatedFailed,
+                textEditingController: unitTypeController,
+                validationFailedMessage: "Please enter a valid text",
+                title: "Unit Type",
               ),
               const SizedBox(height: 16),
 
@@ -145,34 +142,15 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
 
               const SizedBox(height: 16),
 
-              AppTextInputWithTitle(
-                inputFailedValidation: bedsValidatedFailed,
-                textEditingController: bedController,
-                validationFailedMessage: "Please enter a valid number",
-                title: "Beds",
-              ),
-              const SizedBox(width: 16),
-              AppTextInputWithTitle(
-                inputFailedValidation: bathsValidatedFailed,
-                textEditingController: bathsController,
-                validationFailedMessage: "Please enter a valid number",
-                title: "Baths",
-              ),
+              IntDropDownMenu(label: "Beds", onChanged: (bedsSelected) => setState(() => _bedsSelected = bedsSelected)),
+              const SizedBox(height: 16),
 
+              IntDropDownMenu(label: "Baths", onChanged: (bathsSelected) => setState(() => _bathsSelected = bathsSelected)),
               const SizedBox(height: 16),
-              AppTextInputWithTitle(
-                inputFailedValidation: unitNameValidatedFailed,
-                textEditingController: unitNameController,
-                validationFailedMessage: "Please enter a valid text",
-                title: "Unit Name",
-              ),
+
+              IntDropDownMenu(label: "Unit Count", onChanged: (unitCount) => setState(() => _unitCount = unitCount)),
               const SizedBox(height: 16),
-              AppTextInputWithTitle(
-                inputFailedValidation: unitCountValidatedFailed,
-                textEditingController: unitCountController,
-                validationFailedMessage: "Please enter a valid text",
-                title: "Unit Count",
-              ),
+
               const SizedBox(height: 12),
               AppText(textValue: "Note: Clean up, just making functional", fontSize: 14),
               SizedBox(height: 10),

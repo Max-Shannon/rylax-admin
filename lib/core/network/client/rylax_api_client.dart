@@ -44,7 +44,7 @@ class RylaxAPIClient {
     }
   }
 
-  Future<PropertyDTO> createProperty(int developmentPhaseId, CreatePropertyRequest createPropertyRequest) async {
+  Future<bool> createProperty(int developmentPhaseId, CreatePropertyRequest createPropertyRequest) async {
     final uri = Uri.parse("$baseUrl/properties/$developmentPhaseId");
     final body = json.encode(createPropertyRequest.toJson());
     final token = await authService.getFirebaseToken();
@@ -56,8 +56,7 @@ class RylaxAPIClient {
     );
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> jsonMap = json.decode(response.body);
-      return PropertyDTO.fromJson(jsonMap);
+      return true;
     } else {
       throw Exception('Failed to create property. Status: ${response.statusCode}');
     }

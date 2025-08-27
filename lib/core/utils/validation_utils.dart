@@ -34,6 +34,10 @@ class ValidationUtils {
     return string.isNotEmpty;
   }
 
+  static bool validateSelected(int number) {
+    return !number.isNaN;
+  }
+
   static bool validateEmail(String email) {
     return EmailValidator.validate(email);
   }
