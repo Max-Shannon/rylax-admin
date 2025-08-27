@@ -2,34 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:rylax_admin/core/styles/app_colors.dart';
 import 'package:rylax_admin/core/utils/font_size_utils.dart';
 import 'package:rylax_admin/core/widgets/app_text.dart';
+import 'package:rylax_admin/core/network/models/development_phase_dto.dart';
 
-/// Dropdown for selecting a PropertyStyle enum value (as a String)
-/// using your app styles. The underlying value passed to [onChanged]
-/// is the enum name, e.g. "END_OF_TERRACE".
+/// Renders a small error line below a field when [show] is true.
+Widget _errorLine({required bool show, String message = 'Please select an option'}) {
+  if (!show) return const SizedBox.shrink();
+  return Align(
+    alignment: Alignment.centerLeft,
+    child: Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: AppText(textValue: message, fontSize: 14, fontWeight: FontWeight.w300, fontColor: Colors.red),
+    ),
+  );
+}
+
+// =============================================================
+// PropertyStyleDropdown — String enum values with validation line
+// =============================================================
 class PropertyStyleDropdown extends StatelessWidget {
-  /// Currently selected enum name (e.g. 'SEMI_DETACHED'). Null if none.
   final String? selectedValue;
-
-  /// Label shown above the field.
   final String label;
-
-  /// Called when the selected enum name changes.
   final ValueChanged<String?> onChanged;
-
-  /// Optional hint text when nothing is selected.
   final String? hintText;
-
-  /// Whether the field is required; when true, a simple validator is applied.
   final bool required;
-
-  /// Whether the dropdown is disabled.
   final bool enabled;
-
-  /// Optional decoration override (merged with defaults).
   final InputDecoration? decoration;
-
-  /// Options to display. If null, uses the default set mirroring the backend enum.
   final List<String>? options;
+
+  final bool inputFailedValidation;
+  final String validationFailedMessage;
 
   const PropertyStyleDropdown({
     super.key,
@@ -41,6 +42,8 @@ class PropertyStyleDropdown extends StatelessWidget {
     this.enabled = true,
     this.decoration,
     this.options,
+    this.inputFailedValidation = false,
+    this.validationFailedMessage = 'Please select an option',
   });
 
   static const List<String> defaultPropertyStyles = [
@@ -60,35 +63,22 @@ class PropertyStyleDropdown extends StatelessWidget {
     final headingSize = FontSizeUtils.determineHeadingSize(context);
     final values = options ?? defaultPropertyStyles;
 
-    // Build menu items from enum names, but show friendlier labels.
     final items = values
         .map(
           (value) => DropdownMenuItem<String>(
-        value: value,
-        child: AppText(textValue: _labelFromEnum(value), fontSize: 16),
-      ),
-    )
+            value: value,
+            child: AppText(textValue: _labelFromEnum(value), fontSize: 16),
+          ),
+        )
         .toList(growable: false);
 
     final baseDecoration = InputDecoration(
       hintText: hintText ?? 'Select a style',
-      hintStyle: TextStyle(
-        color: AppColors.headingColor,
-        fontSize: headingSize,
-        fontWeight: FontWeight.w400,
-      ),
+      hintStyle: TextStyle(color: AppColors.headingColor, fontSize: headingSize, fontWeight: FontWeight.w400),
       isDense: true,
-      labelStyle: TextStyle(
-        color: AppColors.headingColor,
-        fontSize: headingSize,
-        fontWeight: FontWeight.bold,
-      ),
-      enabledBorder: UnderlineInputBorder(
-        borderSide: BorderSide(color: AppColors.headingColor),
-      ),
-      focusedBorder: UnderlineInputBorder(
-        borderSide: BorderSide(color: AppColors.headingColor, width: 2),
-      ),
+      labelStyle: TextStyle(color: AppColors.headingColor, fontSize: headingSize, fontWeight: FontWeight.bold),
+      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.headingColor)),
+      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.headingColor, width: 2)),
     );
 
     return Column(
@@ -98,13 +88,12 @@ class PropertyStyleDropdown extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: AppText(textValue: label, fontSize: headingSize),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
         DropdownButtonFormField<String>(
           value: selectedValue,
           items: items,
           dropdownColor: AppColors.mainWhite,
           decoration: baseDecoration.copyWith(
-            // Merge provided decoration if any
             labelText: decoration?.labelText ?? baseDecoration.labelText,
             hintText: decoration?.hintText ?? baseDecoration.hintText,
             isDense: decoration?.isDense ?? baseDecoration.isDense,
@@ -120,22 +109,18 @@ class PropertyStyleDropdown extends StatelessWidget {
           onChanged: enabled ? onChanged : null,
           validator: required
               ? (value) {
-            if (value == null || value.isEmpty) return 'Please select a style';
-            return null;
-          }
+                  if (value == null || value.isEmpty) return 'Please select a style';
+                  return null;
+                }
               : null,
           isExpanded: true,
         ),
+        _errorLine(show: inputFailedValidation, message: validationFailedMessage),
       ],
     );
   }
 }
 
-/// Converts enum-style SCREAMING_SNAKE_CASE to Title Case with spaces.
 String _labelFromEnum(String value) {
-  return value
-      .toLowerCase()
-      .split('_')
-      .map((w) => w.isEmpty ? w : w[0].toUpperCase() + w.substring(1))
-      .join(' ');
+  return value.toLowerCase().split('_').map((w) => w.isEmpty ? w : w[0].toUpperCase() + w.substring(1)).join(' ');
 }

@@ -57,15 +57,15 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
   }
 
   void refreshState(
-      bool propertyStyleValidated,
-      bool phaseValidated,
-      bool bedsValidated,
-      bool bathsValidated,
-      bool sqmValidated,
-      bool priceValidated,
-      bool unitTypeValidated,
-      bool unitCountValidated,
-      ) {
+    bool propertyStyleValidated,
+    bool phaseValidated,
+    bool bedsValidated,
+    bool bathsValidated,
+    bool sqmValidated,
+    bool priceValidated,
+    bool unitTypeValidated,
+    bool unitCountValidated,
+  ) {
     setState(() {
       propertyStyleValidatedFailed = !propertyStyleValidated;
       phaseValidatedFailed = !phaseValidated;
@@ -79,57 +79,61 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
   }
 
   Future<void> onSubmit() async {
-    final bool unitTypeSelected = ValidationUtils.validateNotEmpty(unitTypeController.text);
-    final bool propertyStyleSelected = ValidationUtils.validateNotEmpty(_styleSelected!);
-    final bool phaseSelected = ValidationUtils.validateSelected(_selectedPhaseId!);
-    final bool bedsSelected = ValidationUtils.validateSelected(_bedsSelected!);
-    final bool bathsSelected = ValidationUtils.validateSelected(_bathsSelected!);
-    final bool sqmSelected = ValidationUtils.validateNotEmpty(sqmController.text);
-    final bool priceSelected = ValidationUtils.validateNotEmpty(priceController.text);
-    final bool unitCountSelected = ValidationUtils.validateSelected(_unitCount!);
+    try {
+      final bool unitTypeSelected = ValidationUtils.validateNotEmpty(unitTypeController.text);
+      final bool propertyStyleSelected = _styleSelected != null && ValidationUtils.validateNotEmpty(_styleSelected!);
+      final bool phaseSelected = _selectedPhaseId != null && ValidationUtils.validateSelected(_selectedPhaseId!) ?? false;
+      final bool bedsSelected = _bedsSelected != null && ValidationUtils.validateSelected(_bedsSelected!) ?? false;
+      final bool bathsSelected = _bathsSelected != null && ValidationUtils.validateSelected(_bathsSelected!);
+      final bool sqmSelected = ValidationUtils.validateNotEmpty(sqmController.text);
+      final bool priceSelected = ValidationUtils.validateNotEmpty(priceController.text);
+      final bool unitCountSelected = _unitCount != null && ValidationUtils.validateSelected(_unitCount!);
 
-    if (unitTypeSelected &&
-        propertyStyleSelected &&
-        phaseSelected &&
-        bedsSelected &&
-        bathsSelected &&
-        sqmSelected &&
-        priceSelected &&
-        unitTypeSelected &&
-        unitCountSelected) {
-      const propertyType = 'NEW_BUILD';
-      final sqm = int.parse(sqmController.text);
-      final price = int.parse(priceController.text);
+      if (unitTypeSelected &&
+          propertyStyleSelected &&
+          phaseSelected &&
+          bedsSelected &&
+          bathsSelected &&
+          sqmSelected &&
+          priceSelected &&
+          unitTypeSelected &&
+          unitCountSelected) {
+        const propertyType = 'NEW_BUILD';
+        final sqm = int.parse(sqmController.text);
+        final price = int.parse(priceController.text);
 
-      final createPropertyRequest = CreatePropertyRequest(
-        propertyType,
-        _styleSelected!,
-        unitTypeController.text,
-        _unitCount!,
-        _bedsSelected!,
-        _bathsSelected!,
-        sqm,
-        price,
-      );
+        final createPropertyRequest = CreatePropertyRequest(
+          propertyType,
+          _styleSelected!,
+          unitTypeController.text,
+          _unitCount!,
+          _bedsSelected!,
+          _bathsSelected!,
+          sqm,
+          price,
+        );
 
-      final success = await rylaxAPIService.createProperty(_selectedPhaseId!, createPropertyRequest);
-      if (success) {
-        if (mounted) Navigator.pop(context);
-        if (mounted) SnackBarz.showSnackBar(context, AppColors.mainGreen, 'Property Created Successfully');
+        final success = await rylaxAPIService.createProperty(_selectedPhaseId!, createPropertyRequest);
+        if (success) {
+          if (mounted) Navigator.pop(context);
+          if (mounted) SnackBarz.showSnackBar(context, AppColors.mainGreen, 'Property Created Successfully');
+        } else {
+          if (mounted) SnackBarz.showSnackBar(context, AppColors.mainRed, 'Failed to create property, contact support');
+        }
       } else {
-        if (mounted) SnackBarz.showSnackBar(context, AppColors.mainRed, 'Failed to create property, contact support');
+        refreshState(
+          propertyStyleValidatedFailed,
+          phaseValidatedFailed,
+          bedsValidatedFailed,
+          bathsValidatedFailed,
+          sqmValidatedFailed,
+          priceValidatedFailed,
+          unitTypeValidatedFailed,
+          unitCountValidatedFailed,
+        );
       }
-    } else {
-      refreshState(
-        propertyStyleValidatedFailed,
-        phaseValidatedFailed,
-        bedsValidatedFailed,
-        bathsValidatedFailed,
-        sqmValidatedFailed,
-        priceValidatedFailed,
-        unitTypeValidatedFailed,
-        unitCountValidatedFailed,
-      );
+    } on Exception {
+      SnackBarz.showSnackBar(context, AppColors.mainRed, 'Failed to create property, check entered fields.');
     }
   }
 
@@ -141,9 +145,8 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
       backgroundColor: AppColors.mainWhite,
       insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 60),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Container
-        (
-        height: ScreenSizeUtils.calculatePercentageHeight(context, 60),
+      child: Container(
+        height: ScreenSizeUtils.calculatePercentageHeight(context, 70),
         width: ScreenSizeUtils.calculatePercentageWidth(context, 60),
         padding: const EdgeInsets.all(24),
         child: LayoutBuilder(
@@ -163,10 +166,11 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
                     AppTextInputWithTitle(
                       inputFailedValidation: unitTypeValidatedFailed,
                       textEditingController: unitTypeController,
-                      validationFailedMessage: 'Please enter a valid text',
+                      validationFailedMessage: 'Please enter a valid unit type',
                       title: 'Unit Type',
                     ),
                     IntDropDownMenu(
+                      inputFailedValidation: unitCountValidatedFailed,
                       label: 'Unit Count',
                       selectedNumber: _unitCount,
                       required: true,
@@ -181,13 +185,13 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
                     AppTextInputWithTitle(
                       inputFailedValidation: sqmValidatedFailed,
                       textEditingController: sqmController,
-                      validationFailedMessage: 'Please enter a valid text',
+                      validationFailedMessage: 'Please enter a valid SQM',
                       title: 'Sqm',
                     ),
                     AppTextInputWithTitle(
                       inputFailedValidation: priceValidatedFailed,
                       textEditingController: priceController,
-                      validationFailedMessage: 'Please enter a valid text',
+                      validationFailedMessage: 'Please enter a valid price',
                       title: 'Price',
                     ),
                   ),
@@ -197,12 +201,14 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
                   _rowOrColumn(
                     twoCols,
                     PropertyStyleDropdown(
+                      inputFailedValidation: propertyStyleValidatedFailed,
                       label: 'Property Style',
                       selectedValue: _styleSelected,
                       required: true,
                       onChanged: (style) => setState(() => _styleSelected = style),
                     ),
                     PhaseDropdown(
+                      inputFailedValidation: phaseValidatedFailed,
                       phases: widget.developmentDTO.developmentPhases,
                       onChanged: (int? id) => setState(() => _selectedPhaseId = id),
                     ),
@@ -213,12 +219,14 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
                   _rowOrColumn(
                     twoCols,
                     IntDropDownMenu(
+                      inputFailedValidation: bedsValidatedFailed,
                       label: 'Beds',
                       selectedNumber: _bedsSelected,
                       required: true,
                       onChanged: (n) => setState(() => _bedsSelected = n),
                     ),
                     IntDropDownMenu(
+                      inputFailedValidation: bathsValidatedFailed,
                       label: 'Baths',
                       selectedNumber: _bathsSelected,
                       required: true,
@@ -252,13 +260,6 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
         ],
       );
     }
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        left,
-        const SizedBox(height: 50),
-        right,
-      ],
-    );
+    return Column(mainAxisSize: MainAxisSize.min, children: [left, const SizedBox(height: 50), right]);
   }
 }

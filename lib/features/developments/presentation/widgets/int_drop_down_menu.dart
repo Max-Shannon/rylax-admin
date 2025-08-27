@@ -3,27 +3,35 @@ import 'package:rylax_admin/core/styles/app_colors.dart';
 import 'package:rylax_admin/core/utils/font_size_utils.dart';
 import 'package:rylax_admin/core/widgets/app_text.dart';
 
-/// Simple dropdown (1–10) using your app styles.
-/// Returns the selected number via [onChanged].
+/// Renders a small error line below a field when [show] is true.
+Widget _errorLine({required bool show, String message = 'Please select an option'}) {
+  if (!show) return const SizedBox.shrink();
+  return Align(
+    alignment: Alignment.centerLeft,
+    child: Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: AppText(textValue: message, fontSize: 14, fontWeight: FontWeight.w300, fontColor: Colors.red),
+    ),
+  );
+}
+
+// =============================================================
+// IntDropDownMenu — numbers 1..10 with validation message support
+// =============================================================
 class IntDropDownMenu extends StatelessWidget {
-  /// The currently selected number (1–10). Null if none selected yet.
   final int? selectedNumber;
   final String label;
-
-  /// Called when the selected number changes.
   final ValueChanged<int?> onChanged;
-
-  /// Optional hint text when nothing is selected.
   final String? hintText;
-
-  /// Whether the field is required; when true, a simple validator is applied.
   final bool required;
-
-  /// Whether the dropdown is disabled.
   final bool enabled;
-
-  /// Optional decoration override (merged with defaults).
   final InputDecoration? decoration;
+
+  /// If true, shows the error line under the field.
+  final bool inputFailedValidation;
+
+  /// Message to show when [inputFailedValidation] is true.
+  final String validationFailedMessage;
 
   const IntDropDownMenu({
     super.key,
@@ -34,44 +42,29 @@ class IntDropDownMenu extends StatelessWidget {
     this.required = false,
     this.enabled = true,
     this.decoration,
+    this.inputFailedValidation = false,
+    this.validationFailedMessage = 'Please select an option',
   });
 
   @override
   Widget build(BuildContext context) {
     final headingSize = FontSizeUtils.determineHeadingSize(context);
 
-    // Build fixed items 1..10
-    final items = List<DropdownMenuItem<int>>.generate(
-      10,
-          (i) {
-        final value = i + 1; // 1..10
-        return DropdownMenuItem<int>(
-          value: value,
-          child: AppText(textValue: value.toString(), fontSize: 16),
-        );
-      },
-      growable: false,
-    );
+    final items = List<DropdownMenuItem<int>>.generate(10, (i) {
+      final value = i + 1;
+      return DropdownMenuItem<int>(
+        value: value,
+        child: AppText(textValue: value.toString(), fontSize: 16),
+      );
+    }, growable: false);
 
     final baseDecoration = InputDecoration(
       hintText: hintText ?? 'Select a number',
-      hintStyle: TextStyle(
-        color: AppColors.headingColor,
-        fontSize: headingSize,
-        fontWeight: FontWeight.w400,
-      ),
+      hintStyle: TextStyle(color: AppColors.headingColor, fontSize: headingSize, fontWeight: FontWeight.w400),
       isDense: true,
-      labelStyle: TextStyle(
-        color: AppColors.headingColor,
-        fontSize: headingSize,
-        fontWeight: FontWeight.bold,
-      ),
-      enabledBorder: UnderlineInputBorder(
-        borderSide: BorderSide(color: AppColors.headingColor),
-      ),
-      focusedBorder: UnderlineInputBorder(
-        borderSide: BorderSide(color: AppColors.headingColor, width: 2),
-      ),
+      labelStyle: TextStyle(color: AppColors.headingColor, fontSize: headingSize, fontWeight: FontWeight.bold),
+      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.headingColor)),
+      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.headingColor, width: 2)),
     );
 
     return Column(
@@ -87,7 +80,6 @@ class IntDropDownMenu extends StatelessWidget {
           items: items,
           dropdownColor: AppColors.mainWhite,
           decoration: baseDecoration.copyWith(
-            // Merge provided decoration if any
             labelText: decoration?.labelText ?? baseDecoration.labelText,
             hintText: decoration?.hintText ?? baseDecoration.hintText,
             isDense: decoration?.isDense ?? baseDecoration.isDense,
@@ -103,12 +95,13 @@ class IntDropDownMenu extends StatelessWidget {
           onChanged: enabled ? onChanged : null,
           validator: required
               ? (value) {
-            if (value == null) return 'Please select a number';
-            return null;
-          }
+                  if (value == null) return 'Please select a number';
+                  return null;
+                }
               : null,
           isExpanded: true,
         ),
+        _errorLine(show: inputFailedValidation, message: validationFailedMessage),
       ],
     );
   }

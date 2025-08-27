@@ -34,6 +34,8 @@ class ValidationUtils {
     return string.isNotEmpty;
   }
 
+
+
   static bool validateSelected(int number) {
     return !number.isNaN;
   }

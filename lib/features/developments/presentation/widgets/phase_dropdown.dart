@@ -1,32 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:rylax_admin/core/network/models/development_phase_dto.dart';
 import 'package:rylax_admin/core/styles/app_colors.dart';
 import 'package:rylax_admin/core/utils/font_size_utils.dart';
 import 'package:rylax_admin/core/widgets/app_text.dart';
+import 'package:rylax_admin/core/network/models/development_phase_dto.dart';
 
-/// A reusable dropdown that displays [DevelopmentPhaseDTO.phaseName]
-/// but returns the corresponding [DevelopmentPhaseDTO.id] on selection.
+/// Renders a small error line below a field when [show] is true.
+Widget _errorLine({required bool show, String message = 'Please select an option'}) {
+  if (!show) return const SizedBox.shrink();
+  return Align(
+    alignment: Alignment.centerLeft,
+    child: Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: AppText(textValue: message, fontSize: 14, fontWeight: FontWeight.w300, fontColor: Colors.red),
+    ),
+  );
+}
+
+// =============================================================
+// PhaseDropdown — phases by name, returns phase id, with error line
+// =============================================================
 class PhaseDropdown extends StatelessWidget {
-  /// All available phases to choose from.
   final List<DevelopmentPhaseDTO> phases;
-
-  /// The currently selected phase id (nullable if none selected yet).
   final int? selectedPhaseId;
-
-  /// Called when the selected phase changes. Receives the selected phase id (or null).
   final ValueChanged<int?> onChanged;
-
-  /// Optional hint text when nothing is selected.
   final String? hintText;
-
-  /// Whether the field is required; when true, a simple validator is applied.
   final bool required;
-
-  /// Whether the dropdown is disabled.
   final bool enabled;
-
-  /// Optional decoration override (merged with defaults).
   final InputDecoration? decoration;
+
+  final bool inputFailedValidation;
+  final String validationFailedMessage;
 
   const PhaseDropdown({
     super.key,
@@ -37,11 +40,14 @@ class PhaseDropdown extends StatelessWidget {
     this.required = false,
     this.enabled = true,
     this.decoration,
+    this.inputFailedValidation = false,
+    this.validationFailedMessage = 'Please select an option',
   });
 
   @override
   Widget build(BuildContext context) {
-    double headingSize = FontSizeUtils.determineHeadingSize(context);
+    final headingSize = FontSizeUtils.determineHeadingSize(context);
+
     final items = phases
         .map(
           (p) => DropdownMenuItem<int>(
@@ -53,39 +59,26 @@ class PhaseDropdown extends StatelessWidget {
 
     final baseDecoration = InputDecoration(
       hintText: hintText ?? 'Select a phase',
-      hintStyle: TextStyle(
-        color: AppColors.headingColor, // your custom colour
-        fontSize: headingSize, // optional
-        fontWeight: FontWeight.w400, // optional
-      ),
+      hintStyle: TextStyle(color: AppColors.headingColor, fontSize: headingSize, fontWeight: FontWeight.w400),
       isDense: true,
-      labelStyle: TextStyle(
-        color: AppColors.headingColor, // your custom colour
-        fontSize: headingSize, // optional
-        fontWeight: FontWeight.bold, // optional
-      ),
-      enabledBorder: UnderlineInputBorder(
-        borderSide: BorderSide(color: AppColors.headingColor), // your custom colour
-      ),
-      focusedBorder: UnderlineInputBorder(
-        borderSide: BorderSide(
-          color: AppColors.headingColor, // colour when focused
-          width: 2, // thickness when focused
-        ),
-      ),
+      labelStyle: TextStyle(color: AppColors.headingColor, fontSize: headingSize, fontWeight: FontWeight.bold),
+      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.headingColor)),
+      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.headingColor, width: 2)),
     );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Align(alignment: Alignment.centerLeft, child: AppText(textValue: "Phase Selection", fontSize: headingSize)),
-        SizedBox(height: 20),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: AppText(textValue: 'Phase', fontSize: headingSize),
+        ),
+        const SizedBox(height: 16),
         DropdownButtonFormField<int>(
           value: selectedPhaseId,
           items: items,
           dropdownColor: AppColors.mainWhite,
           decoration: baseDecoration.copyWith(
-            // Merge provided decoration if any
             labelText: decoration?.labelText ?? baseDecoration.labelText,
             hintText: decoration?.hintText ?? baseDecoration.hintText,
             isDense: decoration?.isDense ?? baseDecoration.isDense,
@@ -93,6 +86,10 @@ class PhaseDropdown extends StatelessWidget {
             suffixIcon: decoration?.suffixIcon,
             helperText: decoration?.helperText,
             errorText: decoration?.errorText,
+            enabledBorder: decoration?.enabledBorder ?? baseDecoration.enabledBorder,
+            focusedBorder: decoration?.focusedBorder ?? baseDecoration.focusedBorder,
+            labelStyle: decoration?.labelStyle ?? baseDecoration.labelStyle,
+            hintStyle: decoration?.hintStyle ?? baseDecoration.hintStyle,
           ),
           onChanged: enabled ? onChanged : null,
           validator: required
@@ -103,14 +100,13 @@ class PhaseDropdown extends StatelessWidget {
               : null,
           isExpanded: true,
         ),
+        _errorLine(show: inputFailedValidation, message: validationFailedMessage),
       ],
     );
   }
 }
 
-/// Convenience helpers
 extension DevelopmentPhaseListX on List<DevelopmentPhaseDTO> {
-  /// Finds a phase by id, or null if not found.
   DevelopmentPhaseDTO? byId(int? id) {
     if (id == null) return null;
     for (final p in this) {
