@@ -10,6 +10,7 @@ class DevelopmentDTO {
   late final int id;
   late final DeveloperDTO developer;
   late final String developmentName;
+  late final String developmentCoverPhotoImage;
   late final double developmentLat;
   late final double developmentLng;
   late final List<DevelopmentPhaseDTO> developmentPhases;

@@ -32,7 +32,7 @@ class DevelopmentsHome extends StatelessWidget {
             crossAxisCount: 2,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
-            childAspectRatio: 4 / 3, // adjust to taste
+            childAspectRatio: 4 / 3.5, // adjust to taste
           ),
           itemCount: developments?.length,
           itemBuilder: (context, index) {
