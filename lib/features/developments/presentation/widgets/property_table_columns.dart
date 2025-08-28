@@ -3,6 +3,8 @@ import 'package:pluto_grid/pluto_grid.dart';
 import 'package:rylax_admin/core/styles/app_colors.dart';
 import 'package:rylax_admin/core/styles/app_text_styles.dart';
 import 'package:rylax_admin/features/developments/presentation/widgets/assign_buyer_button.dart';
+import 'package:rylax_admin/features/developments/presentation/widgets/buyer_assignement_selection.dart';
+import 'package:rylax_admin/features/developments/presentation/widgets/property_view_dialog.dart';
 
 import '../../../../core/utils/snack_barz.dart';
 
@@ -76,6 +78,24 @@ class PropertyTableColumns {
     debugPrint('Archive -> ${row.cells['phaseName']?.value}');
   }
 
+  void showBuyerAssignmentDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return BuyerAssigmentDialog();
+      },
+    );
+  }
+
+  void showPropertyDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return PropertyViewDialog();
+      },
+    );
+  }
+
   getDefaultColumns(BuildContext context) {
     return [
       PlutoColumn(
@@ -84,7 +104,6 @@ class PropertyTableColumns {
         type: PlutoColumnType.text(),
         // <- not number; we render custom UI
         enableSorting: false,
-        // actions shouldn't sort
         readOnly: true,
         enableContextMenu: false,
         minWidth: 120,
@@ -103,7 +122,7 @@ class PropertyTableColumns {
                 message: 'Open',
                 child: IconButton(
                   icon: const Icon(Icons.open_in_new),
-                  onPressed: () => _onOpen(ctx.row),
+                  onPressed: () => showPropertyDialog(context),
                   visualDensity: VisualDensity.compact,
                 ),
               ),
@@ -141,10 +160,7 @@ class PropertyTableColumns {
               child: AssignBuyerButton(
                 tooltip: 'Assign Buyer',
                 onPressed: () {
-
-                  debugPrint('Add buyer clicked for row: ${rendererContext.row.key}');
-                  SnackBarz.showSnackBar(context, AppColors.mainRed, "Unimplemented");
-                  // your logic here
+                  showBuyerAssignmentDialog(context);
                 },
               ),
             );
@@ -301,7 +317,6 @@ class PropertyTableColumns {
         enableContextMenu: false,
         readOnly: true,
       ),
-
     ];
   }
 }

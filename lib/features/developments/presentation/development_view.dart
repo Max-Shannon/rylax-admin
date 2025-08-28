@@ -90,6 +90,18 @@ class _DevelopmentViewState extends State<DevelopmentView> {
 
   final Map<String, String> buildStatusLabelToKey = buildStatusLabels.map((key, label) => MapEntry(label, key));
 
+  static const propertyStyleLabels = {
+    'END_OF_TERRACE': 'End of Terrace',
+    'MID_TERRACE': 'Mid Terrace',
+    'SEMI_DETACHED': 'Semi Detached',
+    'DETACHED': 'Detached',
+    'BUNGALOW': 'Bungalow',
+    'GROUND_FLOOR_END_OF_TERRACE': 'Ground Floor End of Terrace',
+    'GROUND_FLOOR_MID_TERRACE': 'Ground Floor Mid Terrace',
+    'DUPLEX_END_OF_TERRACE': 'Duplex End of Terrace',
+    'DUPLEX_MID_TERRACE': 'Duplex Mid Terrace',
+  };
+
   @override
   Widget build(BuildContext context) {
     final headingSize = FontSizeUtils.determineHeadingSize(context);
@@ -108,7 +120,7 @@ class _DevelopmentViewState extends State<DevelopmentView> {
             const SizedBox(height: 30),
             Row(
               children: [
-                AppText(textValue: "Phases: ${_rows.length}", fontSize: subtitleSize),
+                AppText(textValue: "Phases: ${widget.developmentDTO.developmentPhases.length}", fontSize: subtitleSize),
                 const SizedBox(width: 20),
                 AppText(textValue: "Properties: ${_rows.length}", fontSize: subtitleSize),
                 const SizedBox(width: 20),
@@ -202,7 +214,7 @@ class _DevelopmentViewState extends State<DevelopmentView> {
             key: rowKey,
             cells: {
               'unitType': PlutoCell(value: property.unitType),
-              'propertyStyle': PlutoCell(value: property.propertyStyle),
+              'propertyStyle': PlutoCell(value: propertyStyleLabels[property.propertyStyle] ?? property.propertyStyle),
               'buyerAssigned': PlutoCell(value: property.assignedBuyerId),
               'saleStatus': PlutoCell(value: buildSaleStatusLabels[property.saleStatus] ?? property.saleStatus),
               'buildStatus': PlutoCell(value: buildStatusLabels[property.buildStatus] ?? property.buildStatus),
