@@ -79,30 +79,51 @@ class PropertyTableColumns {
   getDefaultColumns(BuildContext context) {
     return [
       PlutoColumn(
-        title: 'Unit Type',
-        field: 'unitType',
+        title: 'Actions',
+        field: 'actions',
         type: PlutoColumnType.text(),
-        enableSorting: true,
-        // click header to sort
-        minWidth: 40,
+        // <- not number; we render custom UI
+        enableSorting: false,
+        // actions shouldn't sort
+        readOnly: true,
+        enableContextMenu: false,
+        minWidth: 120,
         width: 120,
-        // user can drag to resize in UI
-        enableContextMenu: false,
-        readOnly: true,
-      ),
-      PlutoColumn(
-        title: 'Property Style',
-        field: 'propertyStyle',
-        type: PlutoColumnType.text(),
-        enableSorting: true,
-        // click header to sort
-        minWidth: 40,
-        width: 180,
-        // user can drag to resize in UI
-        enableContextMenu: false,
-        readOnly: true,
-      ),
+        renderer: (ctx) {
+          // Grab whatever you need from the row:
+          final propertyType = ctx.row.cells['propertyType']?.value;
+          final phaseName = ctx.row.cells['phaseName']?.value;
+          final phaseNumber = ctx.row.cells['phaseNumber']?.value;
 
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Tooltip(
+                message: 'Open',
+                child: IconButton(
+                  icon: const Icon(Icons.open_in_new),
+                  onPressed: () => _onOpen(ctx.row),
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+              // Optional overflow menu if you want more actions without widening the column:
+              PopupMenuButton<String>(
+                tooltip: 'More',
+                itemBuilder: (context) => const [
+                  PopupMenuItem(value: 'delete', child: Text('Delete')),
+                  PopupMenuItem(value: 'archive', child: Text('Archive')),
+                ],
+                onSelected: (value) {
+                  //if (value == 'delete') _onDelete(ctx.row);
+                  if (value == 'archive') _onArchive(ctx.row);
+                },
+                icon: const Icon(Icons.more_vert),
+              ),
+            ],
+          );
+        },
+      ),
       PlutoColumn(
         title: 'Buyer',
         field: 'buyerAssigned',
@@ -134,12 +155,38 @@ class PropertyTableColumns {
       ),
 
       PlutoColumn(
+        title: 'Unit Type',
+        field: 'unitType',
+        type: PlutoColumnType.text(),
+        enableSorting: true,
+        // click header to sort
+        minWidth: 40,
+        width: 100,
+        // user can drag to resize in UI
+        enableContextMenu: false,
+        readOnly: true,
+      ),
+
+      PlutoColumn(
+        title: 'Property Style',
+        field: 'propertyStyle',
+        type: PlutoColumnType.text(),
+        enableSorting: true,
+        // click header to sort
+        minWidth: 40,
+        width: 180,
+        // user can drag to resize in UI
+        enableContextMenu: false,
+        readOnly: true,
+      ),
+
+      PlutoColumn(
         title: 'Sale Status',
         field: 'saleStatus',
         type: PlutoColumnType.select(kSaleStatuses),
         enableSorting: true,
         minWidth: 100,
-        width: 140,
+        width: 240,
         enableContextMenu: false,
         readOnly: false,
         // 👈 must be editable for the dropdown
@@ -205,17 +252,6 @@ class PropertyTableColumns {
           );
         },
       ),
-
-      PlutoColumn(
-        title: 'Property Type',
-        field: 'propertyType',
-        type: PlutoColumnType.text(),
-        enableSorting: true,
-        minWidth: 140,
-        // user can drag to resize in UI
-        enableContextMenu: false,
-        readOnly: true,
-      ),
       PlutoColumn(
         title: 'Phase Name',
         field: 'phaseName',
@@ -226,22 +262,12 @@ class PropertyTableColumns {
         readOnly: true,
       ),
       PlutoColumn(
-        title: 'Phase #',
-        field: 'phaseNumber',
-        type: PlutoColumnType.number(),
-        enableSorting: true,
-        minWidth: 120,
-        width: 120,
-        enableContextMenu: false,
-        readOnly: true,
-      ),
-      PlutoColumn(
         title: 'Beds',
         field: 'bedsNumber',
         type: PlutoColumnType.number(),
         enableSorting: true,
-        minWidth: 120,
-        width: 120,
+        minWidth: 40,
+        width: 70,
         enableContextMenu: false,
         readOnly: true,
       ),
@@ -250,8 +276,8 @@ class PropertyTableColumns {
         field: 'bathsNumber',
         type: PlutoColumnType.number(),
         enableSorting: true,
-        minWidth: 120,
-        width: 120,
+        minWidth: 40,
+        width: 70,
         enableContextMenu: false,
         readOnly: true,
       ),
@@ -260,69 +286,22 @@ class PropertyTableColumns {
         field: 'squareMeters',
         type: PlutoColumnType.number(),
         enableSorting: true,
-        minWidth: 120,
-        width: 120,
+        minWidth: 60,
+        width: 80,
         enableContextMenu: false,
         readOnly: true,
       ),
       PlutoColumn(
-        title: 'Actions',
-        field: 'actions',
-        type: PlutoColumnType.text(),
-        // <- not number; we render custom UI
-        enableSorting: false,
-        // actions shouldn't sort
-        readOnly: true,
-        enableContextMenu: false,
+        title: 'Price',
+        field: 'price',
+        type: PlutoColumnType.number(),
+        enableSorting: true,
         minWidth: 120,
         width: 120,
-        renderer: (ctx) {
-          // Grab whatever you need from the row:
-          final propertyType = ctx.row.cells['propertyType']?.value;
-          final phaseName = ctx.row.cells['phaseName']?.value;
-          final phaseNumber = ctx.row.cells['phaseNumber']?.value;
-
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Tooltip(
-                message: 'Open',
-                child: IconButton(
-                  icon: const Icon(Icons.open_in_new),
-                  onPressed: () => _onOpen(ctx.row),
-                  visualDensity: VisualDensity.compact,
-                ),
-              ),
-              Tooltip(
-                message: 'Edit',
-                child: IconButton(icon: const Icon(Icons.edit), onPressed: () => _onEdit(ctx.row), visualDensity: VisualDensity.compact),
-              ),
-              Tooltip(
-                message: 'Upload file',
-                child: IconButton(
-                  icon: const Icon(Icons.upload_file),
-                  onPressed: () => _onUpload(ctx.row),
-                  visualDensity: VisualDensity.compact,
-                ),
-              ),
-              // Optional overflow menu if you want more actions without widening the column:
-              PopupMenuButton<String>(
-                tooltip: 'More',
-                itemBuilder: (context) => const [
-                  PopupMenuItem(value: 'delete', child: Text('Delete')),
-                  PopupMenuItem(value: 'archive', child: Text('Archive')),
-                ],
-                onSelected: (value) {
-                  //if (value == 'delete') _onDelete(ctx.row);
-                  if (value == 'archive') _onArchive(ctx.row);
-                },
-                icon: const Icon(Icons.more_vert),
-              ),
-            ],
-          );
-        },
+        enableContextMenu: false,
+        readOnly: true,
       ),
+
     ];
   }
 }
