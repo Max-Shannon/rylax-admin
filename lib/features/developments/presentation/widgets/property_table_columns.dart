@@ -1,13 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
+import 'package:rylax_admin/core/styles/app_colors.dart';
 import 'package:rylax_admin/core/styles/app_text_styles.dart';
-import 'package:rylax_admin/core/widgets/app_icon_button.dart';
+import 'package:rylax_admin/features/developments/presentation/widgets/assign_buyer_button.dart';
+
+import '../../../../core/utils/snack_barz.dart';
 
 class PropertyTableColumns {
   PlutoGridStateManager? _stateManager;
 
-  static const kBuildStatuses = <String>['Planning', 'Pre Construction', 'Groundwork and Foundations', 'Structural Build', 'First Fix', 'External Finishes', 'Second Fix', 'Internal Finishes', 'Handover Stage', 'Complete'];
-  static const kSaleStatuses = <String>['Awaiting Instruction', 'Instructed', 'Listed', 'Reserved', 'Booking Deposit Received', 'Contracts Issued', 'Snagging', 'Snagged', 'Snags Complete', 'Complete'];
+  static const kBuildStatuses = <String>[
+    'Planning',
+    'Pre Construction',
+    'Groundwork and Foundations',
+    'Structural Build',
+    'First Fix',
+    'External Finishes',
+    'Second Fix',
+    'Internal Finishes',
+    'Handover Stage',
+    'Complete',
+  ];
+  static const kSaleStatuses = <String>[
+    'Awaiting Instruction',
+    'Instructed',
+    'Listed',
+    'Reserved',
+    'Booking Deposit Received',
+    'Contracts Issued',
+    'Snagging',
+    'Snagged',
+    'Snags Complete',
+    'Complete',
+  ];
 
   void doNothing() {}
 
@@ -51,7 +76,7 @@ class PropertyTableColumns {
     debugPrint('Archive -> ${row.cells['phaseName']?.value}');
   }
 
-  getDefaultColumns() {
+  getDefaultColumns(BuildContext context) {
     return [
       PlutoColumn(
         title: 'Unit Type',
@@ -77,18 +102,6 @@ class PropertyTableColumns {
         enableContextMenu: false,
         readOnly: true,
       ),
-      // PlutoColumn(
-      //   title: 'Buyer',
-      //   field: 'buyerAssigned',
-      //   type: PlutoColumnType.text(),
-      //   enableSorting: true,
-      //   // click header to sort
-      //   minWidth: 40,
-      //   width: 120,
-      //   // user can drag to resize in UI
-      //   enableContextMenu: false,
-      //   readOnly: true,
-      // ),
 
       PlutoColumn(
         title: 'Buyer',
@@ -104,21 +117,21 @@ class PropertyTableColumns {
 
           if (value == null || value.toString().trim().isEmpty) {
             return GestureDetector(
-              onTap: () {
-                // TODO: your on-click logic
-                debugPrint('Add buyer clicked for row: ${rendererContext.row.key}');
-              },
-              child: AppIconButton(icon: Icons.add, label: "add", onPressed: doNothing)
+              child: AssignBuyerButton(
+                tooltip: 'Assign Buyer',
+                onPressed: () {
+
+                  debugPrint('Add buyer clicked for row: ${rendererContext.row.key}');
+                  SnackBarz.showSnackBar(context, AppColors.mainRed, "Unimplemented");
+                  // your logic here
+                },
+              ),
             );
           } else {
-            return Text(
-              value.toString(),
-              overflow: TextOverflow.ellipsis,
-            );
+            return Text(value.toString(), overflow: TextOverflow.ellipsis);
           }
         },
       ),
-
 
       PlutoColumn(
         title: 'Sale Status',

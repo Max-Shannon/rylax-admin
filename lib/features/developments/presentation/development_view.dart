@@ -30,7 +30,7 @@ class _DevelopmentViewState extends State<DevelopmentView> {
   @override
   void initState() {
     super.initState();
-    _columns = PropertyTableColumns().getDefaultColumns();
+    _columns = PropertyTableColumns().getDefaultColumns(context);
     _rows = _extractRows(widget.developmentDTO);
   }
 
