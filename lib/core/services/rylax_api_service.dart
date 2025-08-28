@@ -19,4 +19,8 @@ class RylaxAPIService {
   Future<bool> createProperty(int developmentPhaseId, CreatePropertyRequest createPropertyRequest) {
     return rylaxClient.createProperty(developmentPhaseId, createPropertyRequest);
   }
+
+  Future<PropertyDTO> updateProperty(PropertyDTO propertyDTO) {
+    return rylaxClient.updateProperty(propertyDTO);
+  }
 }

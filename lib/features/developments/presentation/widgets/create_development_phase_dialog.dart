@@ -79,17 +79,16 @@ class _CreateDevelopmentPhaseState extends State<CreateDevelopmentPhaseDialog> {
       insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 60),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Container(
-        height: ScreenSizeUtils.calculatePercentageHeight(context, 95),
-        width: ScreenSizeUtils.calculatePercentageWidth(context, 42.5),
+        height: ScreenSizeUtils.calculatePercentageHeight(context, 40),
+        width: ScreenSizeUtils.calculatePercentageWidth(context, 30),
         padding: const EdgeInsets.all(24),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              AppText(textValue: "Add New Property", fontSize: headingSize),
+              AppText(textValue: "Add New Phase", fontSize: headingSize),
               const SizedBox(height: 6),
-              const AppText(textValue: "Non-functional", fontSize: 14, fontWeight: FontWeight.w300),
               const SizedBox(height: 32),
               AppTextInputWithTitle(
                 inputFailedValidation: phaseNamedValidationFailed,
@@ -105,7 +104,6 @@ class _CreateDevelopmentPhaseState extends State<CreateDevelopmentPhaseDialog> {
                 title: "Phase Selector",
               ),
               const SizedBox(height: 16),
-              AppText(textValue: "Note: Clean up, just making functional", fontSize: 14),
               SizedBox(height: 10),
               AppFormSubmitButton(label: "Create", function: () => onSubmit()),
             ],

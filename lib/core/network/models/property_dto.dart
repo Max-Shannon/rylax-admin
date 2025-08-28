@@ -9,8 +9,8 @@ class PropertyDTO {
   late final String propertyType;
   late final String propertyStyle;
   late final String unitType;
-  late final String buildStatus;
-  late final String saleStatus;
+  late String buildStatus;
+  late String saleStatus;
   late final int beds;
   late final int baths;
   late final int sqm;
@@ -23,6 +23,10 @@ class PropertyDTO {
 
   factory PropertyDTO.fromJson(Map<String, dynamic> json) => _$PropertyDTOFromJson(json);
 
+  @override
+  String toString() {
+    return 'PropertyDTO{id: $id, assignedBuyerId: $assignedBuyerId, propertyType: $propertyType, propertyStyle: $propertyStyle, unitType: $unitType, buildStatus: $buildStatus, saleStatus: $saleStatus, beds: $beds, baths: $baths, sqm: $sqm, price: $price}';
+  }
 
 
 }

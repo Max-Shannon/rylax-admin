@@ -10,7 +10,9 @@ import 'package:rylax_admin/features/developments/presentation/widgets/create_de
 import 'package:rylax_admin/features/developments/presentation/widgets/create_property_dialog.dart';
 import 'package:rylax_admin/features/developments/presentation/widgets/property_table_columns.dart';
 
+import '../../../core/network/models/property_dto.dart';
 import '../../../core/styles/app_colors.dart';
+import '../../../core/utils/snack_barz.dart';
 
 class DevelopmentView extends StatefulWidget {
   final RylaxAPIService rylaxAPIService = RylaxAPIService();
@@ -25,6 +27,8 @@ class DevelopmentView extends StatefulWidget {
 class _DevelopmentViewState extends State<DevelopmentView> {
   late final List<PlutoColumn> _columns;
   late final List<PlutoRow> _rows;
+  final Map<Key, PropertyDTO> _rowKeyToProperty = {};
+
   PlutoGridStateManager? _stateManager;
 
   @override
@@ -55,6 +59,36 @@ class _DevelopmentViewState extends State<DevelopmentView> {
   void doNothing() {
     print("doing nothing");
   }
+
+  static const buildSaleStatusLabels = {
+    'AWAITING_INSTRUCTION': 'Awaiting Instruction',
+    'INSTRUCTED': 'Instructed',
+    'LISTED': 'Listed',
+    'RESERVED': 'Reserved',
+    'BOOKING_DEPOSIT_RECEIVED': 'Booking Deposit Received',
+    'CONTRACTS_ISSUED': 'Contracts Issued',
+    'SNAGGING': 'Snagging',
+    'SNAGGED': 'Snagged',
+    'SNAGS_COMPLETE': 'Snags Complete',
+    'COMPLETE': 'Complete',
+  };
+
+  final Map<String, String> saleStatusLabelToKey = buildSaleStatusLabels.map((key, label) => MapEntry(label, key));
+
+  static const buildStatusLabels = {
+    'PLANNING': 'Planning',
+    'PRE_CONSTRUCTION': 'Pre Construction',
+    'GROUNDWORK_AND_FOUNDATIONS': 'Groundwork and Foundations',
+    'STRUCTURAL_BUILD': 'Structural Build',
+    'FIRST_FIX_STAGE': 'First Fix Stage',
+    'EXTERNAL_FINISHES': 'External Finishes',
+    'SECOND_FIX_STAGE': 'Second Fix Stage',
+    'INTERNAL_FINISHES': 'Internal Finishes',
+    'HANDOVER_STAGE': 'Handover Stage',
+    'COMPLETE': 'Complete',
+  };
+
+  final Map<String, String> buildStatusLabelToKey = buildStatusLabels.map((key, label) => MapEntry(label, key));
 
   @override
   Widget build(BuildContext context) {
@@ -123,13 +157,27 @@ class _DevelopmentViewState extends State<DevelopmentView> {
                     onLoaded: (event) {
                       _stateManager = event.stateManager;
                     },
-                    onChanged: (event) {
-                      // Row edits if you enable editing later.
+                    onChanged: (event) async {
+                      PropertyDTO? prop = _rowKeyToProperty[event.row.key];
+                      if (prop != null) {
+                        if (event.column.field == 'saleStatus') {
+                          var newStatus = saleStatusLabelToKey[event.value];
+                          prop.saleStatus = newStatus!;
+                          await widget.rylaxAPIService.updateProperty(prop);
+                          SnackBarz.showSnackBar(context, AppColors.mainGreen, "Sale Status Changed");
+                        }
+                        if (event.column.field == 'buildStatus') {
+                          var newStatus = buildStatusLabelToKey[event.value];
+                          prop.buildStatus = newStatus!;
+                          await widget.rylaxAPIService.updateProperty(prop);
+                          SnackBarz.showSnackBar(context, AppColors.mainGreen, "Build Status Changed");
+                        }
+                      }
                     },
-                    configuration:  PlutoGridConfiguration(
+                    configuration: PlutoGridConfiguration(
                       style: PlutoGridStyleConfig(
-                        cellTextStyle:  AppTextStyles.defaultFontStyle(18),
-                        columnTextStyle: AppTextStyles.defaultFontStyle(18)
+                        cellTextStyle: AppTextStyles.defaultFontStyle(18),
+                        columnTextStyle: AppTextStyles.defaultFontStyle(18),
                       ),
                     ), // defaults: sortable + resizable columns
                   ),
@@ -146,14 +194,18 @@ class _DevelopmentViewState extends State<DevelopmentView> {
     final out = <PlutoRow>[];
     for (final phase in dto.developmentPhases) {
       for (final property in phase.properties) {
+        final rowKey = ValueKey(property.id); // stable per property
+        _rowKeyToProperty[rowKey] = property;
+
         out.add(
           PlutoRow(
+            key: rowKey,
             cells: {
               'unitType': PlutoCell(value: property.unitType),
               'propertyStyle': PlutoCell(value: property.propertyStyle),
               'buyerAssigned': PlutoCell(value: property.assignedBuyerId),
-              'saleStatus': PlutoCell(value: property.saleStatus),
-              'buildStatus': PlutoCell(value: property.buildStatus),
+              'saleStatus': PlutoCell(value: buildSaleStatusLabels[property.saleStatus] ?? property.saleStatus),
+              'buildStatus': PlutoCell(value: buildStatusLabels[property.buildStatus] ?? property.buildStatus),
               'phaseName': PlutoCell(value: phase.phaseName),
               'bedsNumber': PlutoCell(value: property.beds),
               'bathsNumber': PlutoCell(value: property.baths),
