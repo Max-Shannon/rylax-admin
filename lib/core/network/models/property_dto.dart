@@ -15,6 +15,7 @@ class PropertyDTO {
   late final int baths;
   late final int sqm;
   late final int price;
+  late final String createdDate;
 
   PropertyDTO(this.id, this.assignedBuyerId, this.propertyType, this.propertyStyle, this.unitType, this.buildStatus, this.saleStatus,
       this.beds, this.baths, this.sqm, this.price);

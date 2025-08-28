@@ -69,7 +69,7 @@ class _DevelopmentViewState extends State<DevelopmentView> {
     'CONTRACTS_ISSUED': 'Contracts Issued',
     'SNAGGING': 'Snagging',
     'SNAGGED': 'Snagged',
-    'SNAGS_COMPLETE': 'Snags Complete',
+    'SNAGS_COMPLETED': 'Snags Completed',
     'COMPLETE': 'Complete',
   };
 
@@ -223,6 +223,7 @@ class _DevelopmentViewState extends State<DevelopmentView> {
               'bathsNumber': PlutoCell(value: property.baths),
               'squareMeters': PlutoCell(value: property.sqm),
               'price': PlutoCell(value: property.price),
+              'createdDate': PlutoCell(value: property.createdDate),
               'actions': PlutoCell(value: "Todo"),
             },
           ),

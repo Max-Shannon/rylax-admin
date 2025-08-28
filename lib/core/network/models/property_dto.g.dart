@@ -18,7 +18,7 @@ PropertyDTO _$PropertyDTOFromJson(Map<String, dynamic> json) => PropertyDTO(
   (json['baths'] as num).toInt(),
   (json['sqm'] as num).toInt(),
   (json['price'] as num).toInt(),
-);
+)..createdDate = json['createdDate'] as String;
 
 Map<String, dynamic> _$PropertyDTOToJson(PropertyDTO instance) =>
     <String, dynamic>{
@@ -33,4 +33,5 @@ Map<String, dynamic> _$PropertyDTOToJson(PropertyDTO instance) =>
       'baths': instance.baths,
       'sqm': instance.sqm,
       'price': instance.price,
+      'createdDate': instance.createdDate,
     };
