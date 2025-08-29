@@ -75,33 +75,34 @@ class _DevelopmentViewState extends State<DevelopmentView> {
   }
 
   Future<DevelopmentDTO> _fetch() async {
-    var copy = widget.developmentId;
     return await widget.rylaxAPIService.getDevelopmentById(widget.developmentId);
   }
 
   void _refresh() {
-    setState(() => _future = _fetch());
+    print("state-refresh");
+    setState(() {
+        _future = _fetch();
+    });
   }
 
   void _showCreateDevelopmentPhaseDialog(BuildContext context, DevelopmentDTO dto) {
     showDialog(
       context: context,
       builder: (_) => CreateDevelopmentPhaseDialog(developmentDTO: dto),
-    ).then((_) => _refresh()); // refresh after closing
+    ); // refresh after closing
   }
 
   void _showCreatePropertyDialog(BuildContext context, DevelopmentDTO dto) {
     showDialog(
       context: context,
-      builder: (_) => CreatePropertyDialog(developmentDTO: dto),
-    ).then((_) => _refresh());
+      builder: (_) => CreatePropertyDialog(developmentDTO: dto, refreshDevelopmentViewState: _refresh),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final headingSize = FontSizeUtils.determineHeadingSize(context);
     final subtitleSize = FontSizeUtils.determineSubtitleSize(context);
-
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: FutureBuilder<DevelopmentDTO>(

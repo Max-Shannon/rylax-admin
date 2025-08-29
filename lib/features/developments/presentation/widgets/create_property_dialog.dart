@@ -17,8 +17,9 @@ import '../../../../core/widgets/app_text_input_with_title.dart';
 
 class CreatePropertyDialog extends StatefulWidget {
   final DevelopmentDTO developmentDTO;
+  final Function refreshDevelopmentViewState;
 
-  const CreatePropertyDialog({super.key, required this.developmentDTO});
+  const CreatePropertyDialog({super.key, required this.developmentDTO, required this.refreshDevelopmentViewState});
 
   @override
   State<CreatePropertyDialog> createState() => _CreatePropertyDialogState();
@@ -117,6 +118,7 @@ class _CreatePropertyDialogState extends State<CreatePropertyDialog> {
         if (success) {
           if (mounted) Navigator.pop(context);
           if (mounted) SnackBarz.showSnackBar(context, AppColors.mainGreen, 'Property Created Successfully');
+          await widget.refreshDevelopmentViewState();
         } else {
           if (mounted) SnackBarz.showSnackBar(context, AppColors.mainRed, 'Failed to create property, contact support');
         }
