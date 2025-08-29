@@ -79,7 +79,6 @@ class _DevelopmentViewState extends State<DevelopmentView> {
   }
 
   void _refresh() {
-    print("state-refresh");
     setState(() {
         _future = _fetch();
     });
@@ -125,7 +124,7 @@ class _DevelopmentViewState extends State<DevelopmentView> {
           }
 
           final dto = snap.data!;
-          final columns = PropertyTableColumns().getDefaultColumns(context);
+          final columns = PropertyTableColumns().getDefaultColumns(context, dto);
           final rowKeyToProperty = <Key, PropertyDTO>{};
           final rows = _extractRows(dto, rowKeyToProperty);
 
@@ -260,7 +259,7 @@ class _DevelopmentViewState extends State<DevelopmentView> {
               'squareMeters': PlutoCell(value: property.sqm),
               'price': PlutoCell(value: property.price),
               'createdDate': PlutoCell(value: property.createdDate),
-              'actions': PlutoCell(value: "Todo"),
+              'actions': PlutoCell(value: property),
             },
           ),
         );

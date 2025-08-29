@@ -12,7 +12,6 @@ class RylaxAPIClient {
   final AuthService authService = AuthService();
 
   final String baseUrl = 'http://192.168.1.132:8080/api/v1';
-
   //final String baseUrl = 'http://10.201.55.196:8080/api/v1';
 
   Future<DevelopmentDTO> getDevelopmentById(int developmentId) async {

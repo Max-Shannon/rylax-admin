@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
+import 'package:rylax_admin/core/network/models/development_dto.dart';
 import 'package:rylax_admin/core/styles/app_colors.dart';
 import 'package:rylax_admin/core/styles/app_text_styles.dart';
 import 'package:rylax_admin/features/developments/presentation/widgets/assign_buyer_button.dart';
 import 'package:rylax_admin/features/developments/presentation/widgets/buyer_assignement_selection.dart';
 import 'package:rylax_admin/features/developments/presentation/widgets/property_view_dialog.dart';
 
+import '../../../../core/network/models/property_dto.dart';
 import '../../../../core/utils/snack_barz.dart';
 
 class PropertyTableColumns {
@@ -87,16 +89,16 @@ class PropertyTableColumns {
     );
   }
 
-  void showPropertyDialog(BuildContext context) {
+  void showPropertyDialog(BuildContext context, DevelopmentDTO developmentDTO, PropertyDTO propertyDTO) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return PropertyViewDialog();
+        return PropertyViewDialog(developmentDTO: developmentDTO, propertyDTO: propertyDTO);
       },
     );
   }
 
-  getDefaultColumns(BuildContext context) {
+  getDefaultColumns(BuildContext context, DevelopmentDTO developmentDTO) {
     return [
       PlutoColumn(
         title: 'Actions',
@@ -109,10 +111,7 @@ class PropertyTableColumns {
         minWidth: 120,
         width: 120,
         renderer: (ctx) {
-          // Grab whatever you need from the row:
-          final propertyType = ctx.row.cells['propertyType']?.value;
-          final phaseName = ctx.row.cells['phaseName']?.value;
-          final phaseNumber = ctx.row.cells['phaseNumber']?.value;
+          final property = ctx.row.cells['actions']!.value as PropertyDTO;
 
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -122,7 +121,7 @@ class PropertyTableColumns {
                 message: 'Open',
                 child: IconButton(
                   icon: const Icon(Icons.open_in_new),
-                  onPressed: () => showPropertyDialog(context),
+                  onPressed: () => showPropertyDialog(context, developmentDTO, property),
                   visualDensity: VisualDensity.compact,
                 ),
               ),
