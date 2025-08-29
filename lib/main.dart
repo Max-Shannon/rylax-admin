@@ -14,14 +14,15 @@ Future<void> main() async {
 
   final appState = AppState();
   await appState.restoreView();
+  await appState.restoreSelectedDevelopmentId();
 
-  runApp(BuyersPortalApp(appState: appState));
+  runApp(RylaxAdmin(appState: appState));
 }
 
-class BuyersPortalApp extends StatelessWidget {
+class RylaxAdmin extends StatelessWidget {
   final AppState appState;
 
-  const BuyersPortalApp({super.key, required this.appState});
+  const RylaxAdmin({super.key, required this.appState});
 
   @override
   Widget build(BuildContext context) {

@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
-import 'package:rylax_admin/core/network/models/development_dto.dart';
 import 'package:rylax_admin/features/dashboard/presentation/dashboard_home.dart';
 import 'package:rylax_admin/features/developments/presentation/development_view.dart';
 import 'package:rylax_admin/features/developments/presentation/developments_home.dart';
@@ -29,6 +28,7 @@ class LoggedInContainer extends StatelessWidget {
 
       case AppView.developmentView:
         var developmentId = appState.selectedDevelopmentID;
+        print("LoggedInContainner - developmentView - developmentId: $developmentId");
         return DashboardHome(defaultWidget: DevelopmentView(developmentId: developmentId));
 
       default:
