@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'package:rylax_admin/core/network/models/development_dto.dart';
 import 'package:rylax_admin/core/styles/app_colors.dart';
@@ -16,17 +15,26 @@ import '../../developments/presentation/development_view.dart';
 import '../../valuation/valuation_tool.dart';
 
 class DashboardHome extends StatefulWidget {
-  const DashboardHome({super.key});
+  final Widget? defaultWidget;
+
+  const DashboardHome({super.key, this.defaultWidget});
 
   @override
   State<DashboardHome> createState() => _DashboardHomeState();
 }
 
 class _DashboardHomeState extends State<DashboardHome> {
-  Widget selectedWidget = DashboardData();
+  late Widget selectedWidget;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedWidget = widget.defaultWidget ?? const DashboardData();
+  }
 
   void openDashboard(BuildContext context) {
     setState(() {
+      context.read<AppState>().setView(AppView.dashboardHome);
       selectedWidget = DashboardData();
     });
   }
@@ -34,8 +42,7 @@ class _DashboardHomeState extends State<DashboardHome> {
   void openDevelopments(BuildContext context) {
     setState(() {
       context.read<AppState>().setView(AppView.developmentsView);
-
-      selectedWidget = DevelopmentsHome(openDevelopmentView: openDevelopmentView);
+      selectedWidget = DevelopmentsHome();
     });
   }
 
@@ -65,9 +72,10 @@ class _DashboardHomeState extends State<DashboardHome> {
 
   // Possible refactor this later to make the development-view make a http call.
   void openDevelopmentView(BuildContext context, DevelopmentDTO developmentDTO) {
+    context.read<AppState>().setView(AppView.developmentView);
+    context.read<AppState>().setSelectedDevelopmentId(developmentDTO.id);
     setState(() {
-      context.read<AppState>().setView(AppView.developmentView);
-      selectedWidget = DevelopmentView(developmentDTO: developmentDTO);
+      selectedWidget = DevelopmentView(developmentId: developmentDTO.id);
     });
   }
 

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:rylax_admin/core/network/models/development_dto.dart';
+import 'package:rylax_admin/core/network/models/property_dto.dart';
 import 'package:rylax_admin/core/services/rylax_api_service.dart';
 import 'package:rylax_admin/core/styles/app_text_styles.dart';
+import 'package:rylax_admin/core/styles/app_colors.dart';
+import 'package:rylax_admin/core/utils/snack_barz.dart';
 import 'package:rylax_admin/core/utils/font_size_utils.dart';
 import 'package:rylax_admin/core/widgets/app_icon_button.dart';
 import 'package:rylax_admin/core/widgets/app_text.dart';
@@ -10,56 +13,21 @@ import 'package:rylax_admin/features/developments/presentation/widgets/create_de
 import 'package:rylax_admin/features/developments/presentation/widgets/create_property_dialog.dart';
 import 'package:rylax_admin/features/developments/presentation/widgets/property_table_columns.dart';
 
-import '../../../core/network/models/property_dto.dart';
-import '../../../core/styles/app_colors.dart';
-import '../../../core/utils/snack_barz.dart';
-
 class DevelopmentView extends StatefulWidget {
   final RylaxAPIService rylaxAPIService = RylaxAPIService();
-  final DevelopmentDTO developmentDTO;
+  final int developmentId;
 
-  DevelopmentView({super.key, required this.developmentDTO});
+  DevelopmentView({super.key, required this.developmentId});
 
   @override
   State<DevelopmentView> createState() => _DevelopmentViewState();
 }
 
 class _DevelopmentViewState extends State<DevelopmentView> {
-  late final List<PlutoColumn> _columns;
-  late final List<PlutoRow> _rows;
-  final Map<Key, PropertyDTO> _rowKeyToProperty = {};
-
+  late Future<DevelopmentDTO> _future;
   PlutoGridStateManager? _stateManager;
 
-  @override
-  void initState() {
-    super.initState();
-    _columns = PropertyTableColumns().getDefaultColumns(context);
-    _rows = _extractRows(widget.developmentDTO);
-  }
-
-  void showCreateDevelopmentPhaseDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return CreateDevelopmentPhaseDialog(developmentDTO: widget.developmentDTO);
-      },
-    );
-  }
-
-  void showCreatePropertyDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return CreatePropertyDialog(developmentDTO: widget.developmentDTO);
-      },
-    );
-  }
-
-  void doNothing() {
-    print("doing nothing");
-  }
-
+  // Label maps (unchanged)
   static const buildSaleStatusLabels = {
     'AWAITING_INSTRUCTION': 'Awaiting Instruction',
     'INSTRUCTED': 'Instructed',
@@ -72,8 +40,7 @@ class _DevelopmentViewState extends State<DevelopmentView> {
     'SNAGS_COMPLETED': 'Snags Completed',
     'COMPLETE': 'Complete',
   };
-
-  final Map<String, String> saleStatusLabelToKey = buildSaleStatusLabels.map((key, label) => MapEntry(label, key));
+  final Map<String, String> saleStatusLabelToKey = buildSaleStatusLabels.map((k, v) => MapEntry(v, k));
 
   static const buildStatusLabels = {
     'PLANNING': 'Planning',
@@ -87,8 +54,7 @@ class _DevelopmentViewState extends State<DevelopmentView> {
     'HANDOVER_STAGE': 'Handover Stage',
     'COMPLETE': 'Complete',
   };
-
-  final Map<String, String> buildStatusLabelToKey = buildStatusLabels.map((key, label) => MapEntry(label, key));
+  final Map<String, String> buildStatusLabelToKey = buildStatusLabels.map((k, v) => MapEntry(v, k));
 
   static const propertyStyleLabels = {
     'END_OF_TERRACE': 'End of Terrace',
@@ -103,111 +69,180 @@ class _DevelopmentViewState extends State<DevelopmentView> {
   };
 
   @override
+  void initState() {
+    super.initState();
+    _future = _fetch();
+  }
+
+  Future<DevelopmentDTO> _fetch() async {
+    var copy = widget.developmentId;
+    return await widget.rylaxAPIService.getDevelopmentById(widget.developmentId);
+  }
+
+  void _refresh() {
+    setState(() => _future = _fetch());
+  }
+
+  void _showCreateDevelopmentPhaseDialog(BuildContext context, DevelopmentDTO dto) {
+    showDialog(
+      context: context,
+      builder: (_) => CreateDevelopmentPhaseDialog(developmentDTO: dto),
+    ).then((_) => _refresh()); // refresh after closing
+  }
+
+  void _showCreatePropertyDialog(BuildContext context, DevelopmentDTO dto) {
+    showDialog(
+      context: context,
+      builder: (_) => CreatePropertyDialog(developmentDTO: dto),
+    ).then((_) => _refresh());
+  }
+
+  @override
   Widget build(BuildContext context) {
     final headingSize = FontSizeUtils.determineHeadingSize(context);
     final subtitleSize = FontSizeUtils.determineSubtitleSize(context);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: AppText(textValue: widget.developmentDTO.developmentName, fontSize: headingSize),
-            ),
-            const SizedBox(height: 30),
-            Row(
+      body: FutureBuilder<DevelopmentDTO>(
+        future: _future,
+        builder: (context, snap) {
+          if (snap.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snap.hasError) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Failed to load development'),
+                  const SizedBox(height: 8),
+                  ElevatedButton(onPressed: _refresh, child: const Text('Retry')),
+                ],
+              ),
+            );
+          }
+
+          final dto = snap.data!;
+          final columns = PropertyTableColumns().getDefaultColumns(context);
+          final rowKeyToProperty = <Key, PropertyDTO>{};
+          final rows = _extractRows(dto, rowKeyToProperty);
+
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
               children: [
-                AppText(textValue: "Phases: ${widget.developmentDTO.developmentPhases.length}", fontSize: subtitleSize),
-                const SizedBox(width: 20),
-                AppText(textValue: "Properties: ${_rows.length}", fontSize: subtitleSize),
-                const SizedBox(width: 20),
-                AppText(textValue: "Buyers: 14", fontSize: subtitleSize),
-                const SizedBox(width: 20),
-                AppText(textValue: "Verified Buyers: 9", fontSize: subtitleSize),
-                const SizedBox(width: 20),
-                AppText(textValue: "Status: Active", fontSize: subtitleSize),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                AppIconButton(icon: Icons.add, label: "Add Phase", onPressed: () => showCreateDevelopmentPhaseDialog(context)),
-                const SizedBox(width: 20),
-                AppIconButton(icon: Icons.add, label: "Add Property", onPressed: () => showCreatePropertyDialog(context)),
-                const SizedBox(width: 20),
-                AppIconButton(
-                  icon: Icons.add_chart,
-                  label: "View Snags",
-                  foregroundColor: AppColors.mainGreen,
-                  backgroundColor: AppColors.mainWhite,
-                  onPressed: () => doNothing(),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: AppText(textValue: dto.developmentName, fontSize: headingSize),
                 ),
-                const SizedBox(width: 20),
-                AppIconButton(
-                  icon: Icons.upload,
-                  label: "Upload File",
-                  foregroundColor: AppColors.mainGreen,
-                  backgroundColor: AppColors.mainWhite,
-                  onPressed: () => doNothing(),
+                const SizedBox(height: 30),
+                Row(
+                  children: [
+                    AppText(textValue: "Phases: ${dto.developmentPhases.length}", fontSize: subtitleSize),
+                    const SizedBox(width: 20),
+                    AppText(textValue: "Properties: ${rows.length}", fontSize: subtitleSize),
+                    const SizedBox(width: 20),
+                    AppText(textValue: "Buyers: 14", fontSize: subtitleSize),
+                    const SizedBox(width: 20),
+                    AppText(textValue: "Verified Buyers: 9", fontSize: subtitleSize),
+                    const SizedBox(width: 20),
+                    AppText(textValue: "Status: Active", fontSize: subtitleSize),
+                    const Spacer(),
+                    IconButton(onPressed: _refresh, icon: const Icon(Icons.refresh)),
+                  ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: Card(
-                elevation: 1,
-                color: AppColors.mainWhite,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: PlutoGrid(
-                    columns: _columns,
-                    rows: _rows,
-                    onLoaded: (event) {
-                      _stateManager = event.stateManager;
-                    },
-                    onChanged: (event) async {
-                      PropertyDTO? prop = _rowKeyToProperty[event.row.key];
-                      if (prop != null) {
-                        if (event.column.field == 'saleStatus') {
-                          var newStatus = saleStatusLabelToKey[event.value];
-                          prop.saleStatus = newStatus!;
-                          await widget.rylaxAPIService.updateProperty(prop);
-                          SnackBarz.showSnackBar(context, AppColors.mainGreen, "Sale Status Changed");
-                        }
-                        if (event.column.field == 'buildStatus') {
-                          var newStatus = buildStatusLabelToKey[event.value];
-                          prop.buildStatus = newStatus!;
-                          await widget.rylaxAPIService.updateProperty(prop);
-                          SnackBarz.showSnackBar(context, AppColors.mainGreen, "Build Status Changed");
-                        }
-                      }
-                    },
-                    configuration: PlutoGridConfiguration(
-                      style: PlutoGridStyleConfig(
-                        cellTextStyle: AppTextStyles.defaultFontStyle(18),
-                        columnTextStyle: AppTextStyles.defaultFontStyle(18),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    AppIconButton(icon: Icons.add, label: "Add Phase", onPressed: () => _showCreateDevelopmentPhaseDialog(context, dto)),
+                    const SizedBox(width: 20),
+                    AppIconButton(icon: Icons.add, label: "Add Property", onPressed: () => _showCreatePropertyDialog(context, dto)),
+                    const SizedBox(width: 20),
+                    AppIconButton(
+                      icon: Icons.add_chart,
+                      label: "View Snags",
+                      foregroundColor: AppColors.mainGreen,
+                      backgroundColor: AppColors.mainWhite,
+                      onPressed: () {}, // TODO
+                    ),
+                    const SizedBox(width: 20),
+                    AppIconButton(
+                      icon: Icons.upload,
+                      label: "Upload File",
+                      foregroundColor: AppColors.mainGreen,
+                      backgroundColor: AppColors.mainWhite,
+                      onPressed: () {}, // TODO
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: Card(
+                    elevation: 1,
+                    color: AppColors.mainWhite,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: PlutoGrid(
+                        columns: columns,
+                        rows: rows,
+                        onLoaded: (event) => _stateManager = event.stateManager,
+                        onChanged: (event) async {
+                          final prop = rowKeyToProperty[event.row.key];
+                          if (prop == null) return;
+
+                          // optimistic update + rollback on error
+                          final previousSale = prop.saleStatus;
+                          final previousBuild = prop.buildStatus;
+
+                          try {
+                            if (event.column.field == 'saleStatus') {
+                              final newStatus = saleStatusLabelToKey[event.value];
+                              if (newStatus == null) return;
+                              prop.saleStatus = newStatus;
+                              await widget.rylaxAPIService.updateProperty(prop);
+                              SnackBarz.showSnackBar(context, AppColors.mainGreen, "Sale Status Changed");
+                            } else if (event.column.field == 'buildStatus') {
+                              final newStatus = buildStatusLabelToKey[event.value];
+                              if (newStatus == null) return;
+                              prop.buildStatus = newStatus;
+                              await widget.rylaxAPIService.updateProperty(prop);
+                              SnackBarz.showSnackBar(context, AppColors.mainGreen, "Build Status Changed");
+                            }
+                          } catch (_) {
+                            // rollback local change
+                            prop
+                              ..saleStatus = previousSale
+                              ..buildStatus = previousBuild;
+                            SnackBarz.showSnackBar(context, Colors.red, "Failed to update");
+                            _refresh(); // reload truth from server
+                          }
+                        },
+                        configuration: PlutoGridConfiguration(
+                          style: PlutoGridStyleConfig(
+                            cellTextStyle: AppTextStyles.defaultFontStyle(18),
+                            columnTextStyle: AppTextStyles.defaultFontStyle(18),
+                          ),
+                        ),
                       ),
-                    ), // defaults: sortable + resizable columns
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  List<PlutoRow> _extractRows(DevelopmentDTO dto) {
+  List<PlutoRow> _extractRows(DevelopmentDTO dto, Map<Key, PropertyDTO> rowKeyToProperty) {
     final out = <PlutoRow>[];
     for (final phase in dto.developmentPhases) {
       for (final property in phase.properties) {
-        final rowKey = ValueKey(property.id); // stable per property
-        _rowKeyToProperty[rowKey] = property;
+        final rowKey = ValueKey(property.id);
+        rowKeyToProperty[rowKey] = property;
 
         out.add(
           PlutoRow(

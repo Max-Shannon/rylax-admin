@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AppState extends ChangeNotifier {
   AppView currentView = AppView.login;
+  int selectedDevelopmentID = 0;
 
   Future<void> restoreView() async {
     final prefs = await SharedPreferences.getInstance();
@@ -16,16 +17,16 @@ class AppState extends ChangeNotifier {
     await prefs.setString('lastView', view.name);
     notifyListeners();
   }
+
+  Future<void> setSelectedDevelopmentId(int id) async {
+    selectedDevelopmentID = id; // set immediately
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('lastSelectedDevelopmentId', id);
+    notifyListeners();
+  }
 }
 
-enum AppView {
-  login,
-  forgotPassword,
-  dashboardHome,
-  developmentsView,
-  developmentView,
-  tcs,
-}
+enum AppView { login, forgotPassword, dashboardHome, developmentsView, developmentView, tcs }
 
 extension AppViewExtension on AppView {
   String get name => toString().split('.').last;

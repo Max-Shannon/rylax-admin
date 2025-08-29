@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:rylax_admin/core/services/navigation_service.dart';
 import 'package:rylax_admin/core/services/rylax_api_service.dart';
 
 import 'development_card.dart';
 
 class DevelopmentsHome extends StatelessWidget {
   final RylaxAPIService rylaxAPIService = RylaxAPIService();
-  final Function openDevelopmentView;
-
+  final NavigationService navigationService = NavigationService();
   final int hardCodedBranchId = 101;
 
-  DevelopmentsHome({super.key, required this.openDevelopmentView});
+  DevelopmentsHome({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +40,7 @@ class DevelopmentsHome extends StatelessWidget {
             return DevelopmentCard(
               dev: dev,
               onTap: () {
-                openDevelopmentView(context, dev);
+                navigationService.navigateToDevelopmentView(context, dev!);
               },
             );
           },

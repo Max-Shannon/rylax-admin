@@ -1,4 +1,5 @@
 import 'package:rylax_admin/core/network/models/create_development_phase_request.dart';
+import 'package:rylax_admin/core/network/models/development_dto.dart';
 import 'package:rylax_admin/core/network/models/development_response.dart';
 
 import '../network/client/rylax_api_client.dart';
@@ -7,6 +8,10 @@ import '../network/models/property_dto.dart';
 
 class RylaxAPIService {
   final RylaxAPIClient rylaxClient = RylaxAPIClient();
+
+  Future<DevelopmentDTO> getDevelopmentById(int developmentId) {
+    return rylaxClient.getDevelopmentById(developmentId);
+  }
 
   Future<DevelopmentResponse> getDevelopmentsForAgent(int branchId) {
     return rylaxClient.getDevelopmentsByBranchId(branchId);

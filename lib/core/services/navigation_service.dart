@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rylax_admin/core/network/models/development_dto.dart';
 import 'package:rylax_admin/features/dashboard/presentation/dashboard_home.dart';
+import 'package:rylax_admin/features/developments/presentation/development_view.dart';
 
 import '../../features/login/presentation/forgot_password.dart';
 import '../../features/login/presentation/login_page.dart';
@@ -26,4 +28,21 @@ class NavigationService {
     context.read<AppState>().setView(AppView.dashboardHome);
     Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => DashboardHome()));
   }
+
+  void navigateToDevelopmentView(BuildContext context, DevelopmentDTO developmentDTO) {
+    context.read<AppState>().setView(AppView.developmentView);
+    context.read<AppState>().setSelectedDevelopmentId(developmentDTO.id);
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => DashboardHome(
+          defaultWidget: DevelopmentView(developmentId: developmentDTO.id),
+        ),
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+        transitionsBuilder: (_, __, ___, child) => child, // no animation
+      ),
+    );
+
+  }
+
 }

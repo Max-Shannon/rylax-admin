@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:rylax_admin/core/network/models/create_development_phase_request.dart';
 import 'package:rylax_admin/core/network/models/create_property_request.dart';
+import 'package:rylax_admin/core/network/models/development_dto.dart';
 import 'package:rylax_admin/core/network/models/development_response.dart';
 import 'package:rylax_admin/core/network/models/property_dto.dart';
 import 'package:rylax_admin/core/services/auth_service.dart';
@@ -13,6 +14,20 @@ class RylaxAPIClient {
   final String baseUrl = 'http://192.168.1.132:8080/api/v1';
 
   //final String baseUrl = 'http://10.201.55.196:8080/api/v1';
+
+  Future<DevelopmentDTO> getDevelopmentById(int developmentId) async {
+    final uri = Uri.parse("$baseUrl/developments/$developmentId");
+    final token = await authService.getFirebaseToken();
+
+    final response = await http.get(uri, headers: {'Content-Type': 'application/json; charset=UTF-8', 'Authorization': ?token});
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonMap = json.decode(response.body);
+      return DevelopmentDTO.fromJson(jsonMap);
+    } else {
+      throw Exception('Status: ${response.statusCode}');
+    }
+  }
 
   Future<DevelopmentResponse> getDevelopmentsByBranchId(int branchId) async {
     final uri = Uri.parse("$baseUrl/developments?branchId=$branchId");
@@ -57,6 +72,27 @@ class RylaxAPIClient {
 
     if (response.statusCode == 200) {
       return true;
+    } else {
+      throw Exception('Failed to create property. Status: ${response.statusCode}');
+    }
+  }
+
+  Future<PropertyDTO> updateProperty(PropertyDTO propertyDTO) async {
+    var propertyId = propertyDTO.id;
+    final uri = Uri.parse("$baseUrl/properties/$propertyId");
+
+    final body = json.encode(propertyDTO.toJson());
+    final token = await authService.getFirebaseToken();
+
+    final response = await http.patch(
+      uri,
+      headers: {'Content-Type': 'application/json; charset=UTF-8', 'Authorization': ?token},
+      body: body,
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonMap = json.decode(response.body);
+      return PropertyDTO.fromJson(jsonMap);
     } else {
       throw Exception('Failed to create property. Status: ${response.statusCode}');
     }

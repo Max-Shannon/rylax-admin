@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../../../core/app-state/app_state.dart';
 import '../../../../core/services/auth_service.dart';
 import '../../../../core/services/navigation_service.dart';
 import '../../../../core/styles/app_colors.dart';
@@ -44,6 +46,8 @@ class _LoginFormState extends State<LoginForm> {
       if (loginSuccess) {
         _showLoginSuccessSnackBar(context);
         refreshState(emailValidated, passwordValidated);
+
+        context.read<AppState>().setView(AppView.dashboardHome);
         navigationService.navigateToAuthGate(context);
       } else {
         _showLoginFailedSnackBar(context);

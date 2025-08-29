@@ -15,14 +15,22 @@ class LoggedInContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
-    print("loggedInContainer");
+    var currentView = appState.currentView;
+
+    print("LoggedInContainer - appState.view: $currentView");
+
     switch (appState.currentView) {
       case AppView.dashboardHome:
         return DashboardHome();
+
+      // First problem, we need to have a method to open each development.
       case AppView.developmentsView:
-        return DevelopmentsHome(openDevelopmentView: doNothing);
+        return DashboardHome(defaultWidget: DevelopmentsHome());
+
       case AppView.developmentView:
-        return DevelopmentView(developmentDTO: DevelopmentDTO());
+        var developmentId = appState.selectedDevelopmentID;
+        return DashboardHome(defaultWidget: DevelopmentView(developmentId: developmentId));
+
       default:
         throw Exception();
     }
