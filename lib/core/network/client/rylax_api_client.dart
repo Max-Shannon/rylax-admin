@@ -13,11 +13,11 @@ import 'package:rylax_admin/core/services/auth_service.dart';
 class RylaxAPIClient {
   final AuthService authService = AuthService();
 
-  final String baseUrl = 'http://192.168.20.169:8080/api/v1';
+  final String baseUrl = 'http://192.168.1.132:8080/api/v1';
   //final String baseUrl = 'http://10.201.55.196:8080/api/v1';
 
   Future<RylaxValuationResponse> getValuationReport(RylaxPropertyValuationRequest valuationRequest) async {
-    final uri = Uri.parse("$baseUrl/ai/valuation-report-mock");
+    final uri = Uri.parse("$baseUrl/ai/valuation-report");
     final body = jsonEncode(valuationRequest.toJson());
 
     final response = await http.post(

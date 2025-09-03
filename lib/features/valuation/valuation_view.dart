@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:rylax_admin/core/utils/font_size_utils.dart';
+import 'package:rylax_admin/core/widgets/summary_card.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:rylax_admin/core/network/models/valuation/res/rylax_valuation_response.dart';
@@ -16,6 +18,9 @@ class ValuationView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double headingSize = FontSizeUtils.determineHeadingSize(context);
+    double subtitleSize = FontSizeUtils.determineSubtitleSize(context);
+
     return FutureBuilder<RylaxValuationResponse>(
       future: valuationResponse,
       builder: (context, snapshot) {
@@ -37,7 +42,7 @@ class ValuationView extends StatelessWidget {
           return Scaffold(
             backgroundColor: AppColors.mainWhite,
             body: Center(
-              child: Text("Error: ${snapshot.error}", style: const TextStyle(color: Colors.red)),
+              child: AppText(textValue: "Error: ${snapshot.error}", fontSize: headingSize, fontColor: AppColors.mainRed),
             ),
           );
         } else if (!snapshot.hasData) {
@@ -48,30 +53,28 @@ class ValuationView extends StatelessWidget {
         final comps = data.payload.compsPayload.comps;
 
         return Scaffold(
-          backgroundColor: AppColors.mainWhite,
-          appBar: AppBar(
-            backgroundColor: AppColors.mainWhite,
-            elevation: 0,
-            title: const AppText(textValue: "Comparable Properties", fontSize: 18),
-            centerTitle: false,
-          ),
+          backgroundColor: AppColors.backgroundColor,
           body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(12.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (data.summary.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      margin: const EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        color: AppColors.mainGreen.withOpacity(0.06),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.mainGreen.withOpacity(0.2)),
-                      ),
-                      child: AppText(textValue: data.summary, fontSize: 14),
-                    ),
+                  SummaryCard(summary: data.payload.compsPayload.summary, analysisSummary: data.summary),
+
+                  // if (data.summary.isNotEmpty)
+                  //   // Summary Display, Maybe this is a closable box.
+                  //   Container(
+                  //     padding: const EdgeInsets.all(12),
+                  //     margin: const EdgeInsets.only(bottom: 12),
+                  //     decoration: BoxDecoration(
+                  //       color: AppColors.mainGreen.withOpacity(0.06),
+                  //       borderRadius: BorderRadius.circular(12),
+                  //       border: Border.all(color: AppColors.mainGreen.withOpacity(0.2)),
+                  //     ),
+                  //     child: AppText(textValue: data.summary, fontSize: 14),
+                  //   ),
+
                   Expanded(
                     child: LayoutBuilder(
                       builder: (context, constraints) {
@@ -88,7 +91,7 @@ class ValuationView extends StatelessWidget {
                             crossAxisCount: crossAxisCount,
                             crossAxisSpacing: 12,
                             mainAxisSpacing: 12,
-                            childAspectRatio: 4 / 6,
+                            childAspectRatio: 4 / 5,
                           ),
                           itemCount: comps.length,
                           itemBuilder: (context, index) {
@@ -111,6 +114,7 @@ class ValuationView extends StatelessWidget {
 // ---------- CompCard ----------
 class CompCard extends StatelessWidget {
   final CompDTO comp;
+
   const CompCard({super.key, required this.comp});
 
   @override
@@ -149,16 +153,15 @@ class CompCard extends StatelessWidget {
     // Helper chip (auto-hides on null/empty)
     Widget? infoChip({IconData? icon, String? label}) {
       if (label == null || label.trim().isEmpty) return null;
+
       return Chip(
+        color: WidgetStatePropertyAll(AppColors.backgroundColor),
         padding: const EdgeInsets.symmetric(horizontal: 6),
         label: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (icon != null) ...[
-              Icon(icon, size: 16),
-              const SizedBox(width: 4),
-            ],
-            Text(label),
+            if (icon != null) ...[Icon(icon, size: 16), const SizedBox(width: 4)],
+            AppText(textValue: label, fontSize: 12, fontWeight: FontWeight.w400),
           ],
         ),
       );
@@ -172,9 +175,14 @@ class CompCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(width: 140, child: Text(key, style: const TextStyle(fontWeight: FontWeight.w600))),
+            SizedBox(
+              width: 140,
+              child: AppText(textValue: key, fontSize: 16, fontWeight: FontWeight.w600),
+            ),
             const SizedBox(width: 6),
-            Expanded(child: Text(value)),
+            Expanded(
+              child: AppText(textValue: value, fontSize: 12, fontWeight: FontWeight.w400),
+            ),
           ],
         ),
       );
@@ -184,35 +192,12 @@ class CompCard extends StatelessWidget {
 
     return Card(
       elevation: 2,
+      color: AppColors.mainWhite,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(14),
         child: Column(
           children: [
-            // Image area
-            SizedBox(
-              height: 220,
-              width: double.infinity,
-              child: hasImages
-                  ? PageView.builder(
-                itemCount: comp.images!.length,
-                controller: PageController(viewportFraction: 1),
-                itemBuilder: (context, i) {
-                  final url = comp.images![i];
-                  return Image.network(
-                    url,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _ImagePlaceholder(),
-                    loadingBuilder: (context, child, progress) {
-                      if (progress == null) return child;
-                      return const _ImagePlaceholder(isLoading: true);
-                    },
-                  );
-                },
-              )
-                  : const _ImagePlaceholder(),
-            ),
-
             // Content
             Expanded(
               child: Padding(
@@ -225,40 +210,25 @@ class CompCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          child: Text(
-                            comp.title.isNotEmpty ? comp.title : (comp.address.isNotEmpty ? comp.address : 'Untitled'),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                          child: AppText(
+                            textValue: comp.title.isNotEmpty ? comp.title : (comp.address.isNotEmpty ? comp.address : 'Untitled'),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
                         const SizedBox(width: 8),
+
                         if ((comp.status).toString().isNotEmpty)
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: statusColor(comp.status),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: Text(
-                              (comp.status).toString(),
-                              style: TextStyle(
-                                color: statusTextColor(comp.status),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                            decoration: BoxDecoration(color: statusColor(comp.status), borderRadius: BorderRadius.circular(999)),
+                            child: AppText(textValue: (comp.status).toString(), fontSize: 14, fontWeight: FontWeight.w600),
                           ),
                       ],
                     ),
+
                     const SizedBox(height: 4),
-                    if (comp.address.isNotEmpty)
-                      Text(
-                        comp.address,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: Colors.grey.shade700),
-                      ),
+                    if (comp.address.isNotEmpty) AppText(textValue: comp.address, fontSize: 12, fontColor: AppColors.headingColorLight),
                     const SizedBox(height: 8),
 
                     // Quick facts chips (auto-hide nulls)
@@ -269,10 +239,7 @@ class CompCard extends StatelessWidget {
                         if (comp.source.isNotEmpty) infoChip(icon: Icons.public, label: comp.source),
                         if (km(comp.distanceKm) != null) infoChip(icon: Icons.place, label: km(comp.distanceKm)),
                         if (comp.similarityScore != null)
-                          infoChip(
-                            icon: Icons.percent,
-                            label: "Similarity ${(comp.similarityScore! * 100).toStringAsFixed(0)}%",
-                          ),
+                          infoChip(icon: Icons.percent, label: "Similarity ${(comp.similarityScore! * 100).toStringAsFixed(0)}%"),
                         if (comp.beds != null) infoChip(icon: Icons.bed_outlined, label: "${comp.beds} beds"),
                         if (comp.baths != null) infoChip(icon: Icons.bathtub_outlined, label: "${comp.baths} baths"),
                         if (comp.sqm != null) infoChip(icon: Icons.square_foot, label: "${comp.sqm} sqm"),
@@ -282,7 +249,7 @@ class CompCard extends StatelessWidget {
                       ].whereType<Widget>().toList(),
                     ),
 
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 60),
 
                     // Prices & dates (only render non-null)
                     ...[
@@ -293,8 +260,7 @@ class CompCard extends StatelessWidget {
                       infoRow("Date sold", fmtDate(comp.dateSold)),
                       infoRow("Agent", comp.agent),
                       infoRow("Condition", comp.condition),
-                      if (comp.adjustedValueEur != null)
-                        infoRow("Adjusted value", euroInt(comp.adjustedValueEur)),
+                      if (comp.adjustedValueEur != null) infoRow("Adjusted value", euroInt(comp.adjustedValueEur)),
                       if (comp.notes?.isNotEmpty == true) infoRow("Notes", comp.notes),
                     ].whereType<Widget>(),
 
@@ -309,7 +275,7 @@ class CompCard extends StatelessWidget {
                           runSpacing: 6,
                           children: features
                               .take(8) // cap to keep the card compact
-                              .map((f) => Chip(label: Text(f)))
+                              .map((f) => Chip(color: WidgetStatePropertyAll(AppColors.backgroundColor), label: Text(f)))
                               .toList(),
                         ),
                       ),
@@ -324,8 +290,8 @@ class CompCard extends StatelessWidget {
                                 await launchUrlString(comp.url, mode: LaunchMode.externalApplication);
                               }
                             },
-                            icon: const Icon(Icons.open_in_new),
-                            label: const Text("View listing"),
+                            icon: const Icon(Icons.open_in_new, color: AppColors.mainGreen),
+                            label: const AppText(textValue: "View Listing", fontSize: 14),
                           ),
                         const Spacer(),
                         if (comp.lat != null && comp.lon != null)
@@ -354,6 +320,7 @@ class CompCard extends StatelessWidget {
 
 class _ImagePlaceholder extends StatelessWidget {
   final bool isLoading;
+
   const _ImagePlaceholder({this.isLoading = false, super.key});
 
   @override
@@ -364,13 +331,9 @@ class _ImagePlaceholder extends StatelessWidget {
       child: isLoading
           ? const CircularProgressIndicator()
           : Column(
-        mainAxisSize: MainAxisSize.min,
-        children: const [
-          Icon(Icons.image_not_supported_outlined, size: 32),
-          SizedBox(height: 6),
-          Text("No image"),
-        ],
-      ),
+              mainAxisSize: MainAxisSize.min,
+              children: const [Icon(Icons.image_not_supported_outlined, size: 32), SizedBox(height: 6), Text("No image")],
+            ),
     );
   }
 }

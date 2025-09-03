@@ -13,7 +13,7 @@ import '../app-state/auth_gate.dart';
 
 class NavigationService {
   void navigateToValuationView(BuildContext context, Future<RylaxValuationResponse> valuationResponse) {
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => ValuationView(valuationResponse: valuationResponse)));
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => DashboardHome(defaultWidget: ValuationView(valuationResponse: valuationResponse))));
   }
 
   void navigateToAuthGate(BuildContext context) {

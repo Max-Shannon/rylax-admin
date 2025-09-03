@@ -69,7 +69,7 @@ class _ValuationToolState extends State<ValuationTool> {
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+   // if (!_formKey.currentState!.validate()) return;
 
     var valuationRequest = RylaxPropertyValuationRequest();
     valuationRequest.beds = _bedsCount!;
