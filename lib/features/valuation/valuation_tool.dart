@@ -5,7 +5,14 @@ import 'package:rylax_admin/core/network/models/valuation/res/rylax_valuation_re
 import 'package:rylax_admin/core/services/navigation_service.dart';
 import 'package:rylax_admin/core/services/rylax_api_service.dart';
 import 'package:rylax_admin/core/styles/app_colors.dart';
+import 'package:rylax_admin/core/widgets/app_form_submit_button.dart';
 import 'package:rylax_admin/core/widgets/app_text.dart';
+import 'package:rylax_admin/core/widgets/app_text_input_with_title.dart';
+
+import '../../core/widgets/energy_rating_drop_down_menu.dart';
+import '../../core/widgets/finish_level_drop_down_menu.dart';
+import '../developments/presentation/widgets/int_drop_down_menu.dart';
+import '../developments/presentation/widgets/property_style_drop_down.dart';
 
 class ValuationTool extends StatefulWidget {
   const ValuationTool({super.key});
@@ -29,14 +36,24 @@ class _ValuationToolState extends State<ValuationTool> {
   final _buildYearCtrl = TextEditingController();
   final _plotSizeCtrl = TextEditingController();
 
+  bool bedsValidatedFailed = false;
+  bool bathsValidatedFailed = false;
+  bool sqmValidatedFailed = false;
+  bool plotSizeValidatedFailed = false;
+  bool energyRatingValidatedFailed = false;
+  bool buildYearValidated = false;
+  bool propertyStyleValidatedFailed = false;
+  bool finishLevelValidatedFailed = false;
+  bool locationTownValidatedFailed = false;
+  bool locationCountyValidatedFailed = false;
+
+  int? _bedsCount;
+  int? _bathsCount;
+
   // Dropdown values
   String? _energyRating; // A1..G
-  String _finishLevel = 'Standard';
-
-  final _energyRatings = const [
-    'A1','A2','A3','B1','B2','B3','C1','C2','C3','D1','D2','E1','E2','F','G'
-  ];
-  final _finishLevels = const ['Basic', 'Standard', 'Premium'];
+  String? _finishLevel;
+  String? _styleSelected;
 
   @override
   void dispose() {
@@ -55,25 +72,21 @@ class _ValuationToolState extends State<ValuationTool> {
     if (!_formKey.currentState!.validate()) return;
 
     var valuationRequest = RylaxPropertyValuationRequest();
-    valuationRequest.beds = int.tryParse(_bedsCtrl.text)!;
-    valuationRequest.baths = int.tryParse(_bathsCtrl.text)!;
+    valuationRequest.beds = _bedsCount!;
+    valuationRequest.baths = _bathsCount!;
     valuationRequest.locationTown = _locationTownCtrl.text;
     valuationRequest.locationCounty = _locationCountyCtrl.text;
     valuationRequest.energyRating = _energyRating!;
     valuationRequest.sqm = double.tryParse(_sqmCtrl.text)!;
+    valuationRequest.propertyStyle = _styleSelected!;
     valuationRequest.approxBuildYear = int.tryParse(_buildYearCtrl.text)!;
     valuationRequest.plotSize = double.tryParse(_plotSizeCtrl.text)!;
-    valuationRequest.finishLevel = _finishLevel;
-    valuationRequest.features = _featuresCtrl.text
-        .split(',')
-        .map((s) => s.trim())
-        .where((s) => s.isNotEmpty)
-        .toList();
+    valuationRequest.finishLevel = _finishLevel!;
+    valuationRequest.features = _featuresCtrl.text.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
 
     Future<RylaxValuationResponse> response = rylaxAPIService.getValuationReport(valuationRequest);
     navigationService.navigateToValuationView(context, response);
     print("valuation report: $response");
-
   }
 
   InputDecoration _dec(String label, {String? hint, String? suffix}) {
@@ -89,10 +102,6 @@ class _ValuationToolState extends State<ValuationTool> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Valuation Tool"),
-        backgroundColor: AppColors.backgroundColor,
-      ),
       backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
@@ -102,147 +111,143 @@ class _ValuationToolState extends State<ValuationTool> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AppText(
-                  textValue: "Valuation Tool",
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                AppText(textValue: "Valuation Tool", fontSize: 24, fontWeight: FontWeight.bold),
+                AppText(textValue: "Rough Working Proto-type, All Fields are required.", fontSize: 12, fontWeight: FontWeight.bold),
                 const SizedBox(height: 16),
-
-                // Beds / Baths
                 Row(
                   children: [
                     Expanded(
-                      child: TextFormField(
-                        controller: _bedsCtrl,
-                        decoration: _dec('Beds'),
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                        validator: (v) =>
-                        (v == null || v.isEmpty) ? 'Required' : null,
+                      child: AppTextInputWithTitle(
+                        inputFailedValidation: locationTownValidatedFailed,
+                        textEditingController: _locationTownCtrl,
+                        validationFailedMessage: 'Please enter a valid location',
+                        title: 'Location',
+                        hint: 'eg. Pebble Bay, Wicklow Town / Enniscorthy / Or just the road and location town',
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: TextFormField(
-                        controller: _bathsCtrl,
-                        decoration: _dec('Baths'),
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                        validator: (v) =>
-                        (v == null || v.isEmpty) ? 'Required' : null,
+                      child: AppTextInputWithTitle(
+                        inputFailedValidation: locationCountyValidatedFailed,
+                        textEditingController: _locationCountyCtrl,
+                        validationFailedMessage: 'Please enter a valid location',
+                        title: 'County',
+                        hint: 'eg. Co. Wicklow / Co. Dublin etc.',
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-
-                // Location
-                TextFormField(
-                  controller: _locationTownCtrl,
-                  decoration: _dec('Location', hint: 'e.g.Pebble Bay, Rathnew, Co. Wicklow'),
-                  validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Required' : null,
-                ),
-                const SizedBox(height: 12),
-
-                TextFormField(
-                  controller: _locationCountyCtrl,
-                  decoration: _dec('Location', hint: 'e.g. Rathnew/Wicklow Town, Co. Wicklow'),
-                  validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Required' : null,
-                ),
-                const SizedBox(height: 12),
-
-                // Features (multi-line, comma-separated)
-                TextFormField(
-                  controller: _featuresCtrl,
-                  decoration: _dec('Features',
-                      hint: 'Comma-separated (e.g. garden, garage, south-facing)'),
-                  maxLines: 3,
-                ),
-                const SizedBox(height: 12),
-
-                // Energy Rating
-                DropdownButtonFormField<String>(
-                  value: _energyRating,
-                  items: _energyRatings
-                      .map((r) => DropdownMenuItem(value: r, child: Text(r)))
-                      .toList(),
-                  onChanged: (v) => setState(() => _energyRating = v),
-                  decoration: _dec('Energy Rating (BER)'),
-                  validator: (v) => v == null ? 'Select a rating' : null,
-                ),
-                const SizedBox(height: 12),
-
-                // Square meters & Plot size
+                const SizedBox(height: 20),
                 Row(
                   children: [
                     Expanded(
-                      child: TextFormField(
-                        controller: _sqmCtrl,
-                        decoration: _dec('Square Meters', suffix: 'm²'),
-                        keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                        ],
-                        validator: (v) =>
-                        (v == null || v.isEmpty) ? 'Required' : null,
+                      child: IntDropDownMenu(
+                        inputFailedValidation: bedsValidatedFailed,
+                        label: 'Beds',
+                        selectedNumber: _bedsCount,
+                        required: true,
+                        onChanged: (n) => setState(() => _bedsCount = n),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: TextFormField(
-                        controller: _plotSizeCtrl,
-                        decoration: _dec('Plot Size', suffix: 'm²'),
-                        keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                        ],
+                      child: IntDropDownMenu(
+                        inputFailedValidation: bathsValidatedFailed,
+                        label: 'Baths',
+                        selectedNumber: _bathsCount,
+                        required: true,
+                        onChanged: (n) => setState(() => _bathsCount = n),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: EnergyRatingDropDownMenu(
+                        label: 'Energy Rating (BER)',
+                        selectedRating: _energyRating,
+                        required: true,
+                        inputFailedValidation: energyRatingValidatedFailed,
+                        validationFailedMessage: 'Select a BER rating',
+                        onChanged: (v) => setState(() => _energyRating = v),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-
-                // Approx Build Year & Finish Level
+                const SizedBox(height: 20),
                 Row(
                   children: [
                     Expanded(
-                      child: TextFormField(
-                        controller: _buildYearCtrl,
-                        decoration: _dec('Approx. Build Year', hint: 'e.g. 1998'),
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(4),
-                        ],
+                      child: AppTextInputWithTitle(
+                        inputFailedValidation: sqmValidatedFailed,
+                        textEditingController: _sqmCtrl,
+                        validationFailedMessage: 'Please enter a valid SQM',
+                        title: 'Sqm',
+                      ),
+                    ),
+                    const SizedBox(width: 24),
+                    Expanded(
+                      child: AppTextInputWithTitle(
+                        inputFailedValidation: plotSizeValidatedFailed,
+                        textEditingController: _plotSizeCtrl,
+                        validationFailedMessage: 'Please enter a valid plot size',
+                        hint: '0.1 (.1 of Acre) 1.0 (acre)',
+                        title: 'Plot Size',
+                      ),
+                    ),
+                    const SizedBox(width: 24),
+                    Expanded(
+                      child: AppTextInputWithTitle(
+                        inputFailedValidation: buildYearValidated,
+                        textEditingController: _buildYearCtrl,
+                        validationFailedMessage: 'Please enter a valid plot size',
+                        hint: 'eg. 2001, 2007',
+                        title: 'Build Year',
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: PropertyStyleDropdown(
+                        inputFailedValidation: propertyStyleValidatedFailed,
+                        label: 'Property Style',
+                        selectedValue: _styleSelected,
+                        required: true,
+                        onChanged: (style) => setState(() => _styleSelected = style),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: DropdownButtonFormField<String>(
-                        value: _finishLevel,
-                        items: _finishLevels
-                            .map((r) =>
-                            DropdownMenuItem(value: r, child: Text(r)))
-                            .toList(),
-                        onChanged: (v) =>
-                            setState(() => _finishLevel = v ?? _finishLevel),
-                        decoration: _dec('Finish Level'),
+                      child: FinishLevelDropDownMenu(
+                        label: 'Finish Level',
+                        selectedFinishLevel: _finishLevel,
+                        // String?
+                        required: true,
+                        inputFailedValidation: finishLevelValidatedFailed,
+                        // bool
+                        validationFailedMessage: 'Select a finish level',
+                        onChanged: (v) => setState(() => _finishLevel = v!),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 20),
 
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _submit,
-                    child: const Text('Submit'),
+                const SizedBox(height: 20),
+                // Features (multi-line, comma-separated)
+                TextFormField(
+                  controller: _featuresCtrl,
+                  decoration: _dec('Features', hint: 'Comma-separated (e.g. garden, garage, south-facing)'),
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 12),
+
+                Center(
+                  child: SizedBox(
+                    width: 400,
+                    child: AppFormSubmitButton(label: "Submit", function: _submit),
                   ),
                 ),
               ],

@@ -32,7 +32,7 @@ class AppState extends ChangeNotifier {
   }
 }
 
-enum AppView { login, forgotPassword, dashboardHome, developmentsView, developmentView, tcs }
+enum AppView { login, forgotPassword, dashboardHome, developmentsView, developmentView, valuationTool, tcs }
 
 extension AppViewExtension on AppView {
   String get name => toString().split('.').last;

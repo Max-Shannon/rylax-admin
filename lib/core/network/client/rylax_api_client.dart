@@ -17,7 +17,7 @@ class RylaxAPIClient {
   //final String baseUrl = 'http://10.201.55.196:8080/api/v1';
 
   Future<RylaxValuationResponse> getValuationReport(RylaxPropertyValuationRequest valuationRequest) async {
-    final uri = Uri.parse("$baseUrl/ai/valuation-report");
+    final uri = Uri.parse("$baseUrl/ai/valuation-report-mock");
     final body = jsonEncode(valuationRequest.toJson());
 
     final response = await http.post(

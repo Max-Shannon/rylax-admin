@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:rylax_admin/features/dashboard/presentation/dashboard_home.dart';
 import 'package:rylax_admin/features/developments/presentation/development_view.dart';
 import 'package:rylax_admin/features/developments/presentation/developments_home.dart';
+import 'package:rylax_admin/features/valuation/valuation_tool.dart';
 
 import 'app_state.dart';
 
@@ -30,6 +31,9 @@ class LoggedInContainer extends StatelessWidget {
         var developmentId = appState.selectedDevelopmentID;
         print("LoggedInContainner - developmentView - developmentId: $developmentId");
         return DashboardHome(defaultWidget: DevelopmentView(developmentId: developmentId));
+
+      case AppView.valuationTool:
+        return DashboardHome(defaultWidget: ValuationTool());
 
       default:
         throw Exception();
