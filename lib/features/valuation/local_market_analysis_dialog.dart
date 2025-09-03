@@ -20,7 +20,7 @@ class LocalMarketAnalysisDialog extends StatelessWidget {
         child: Container(
           height: ScreenSizeUtils.calculatePercentageHeight(context, 70),
           width: ScreenSizeUtils.calculatePercentageWidth(context, 60),
-          child: AppText(textValue: analysisSummary, fontSize: 12),
+          child: Align(alignment: Alignment.centerLeft, child: AppText(textValue: analysisSummary, fontSize: 12)),
         ),
       ),
     );

@@ -124,20 +124,19 @@ class SummaryCard extends StatelessWidget {
                           );
                   }).toList(),
                 ),
-                Spacer(),
-                SizedBox(
-                  width: 400,
-                  child: TextButton.icon(
-                    onPressed: () {
-                      showPropertyDialog(context);
-                    },
-                    icon: const Icon(Icons.open_in_new, color: AppColors.mainGreen),
-                    label: const AppText(textValue: "View Local Market Analysis", fontSize: 14),
-                  ),
-                ),
               ],
             ),
 
+            SizedBox(
+              width: 400,
+              child: TextButton.icon(
+                onPressed: () {
+                  showPropertyDialog(context);
+                },
+                icon: const Icon(Icons.open_in_new, color: AppColors.mainGreen),
+                label: const AppText(textValue: "View Local Market Analysis", fontSize: 14),
+              ),
+            ),
             const SizedBox(height: 12),
           ],
         ],
