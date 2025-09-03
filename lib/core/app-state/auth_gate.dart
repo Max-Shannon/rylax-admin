@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:rylax_admin/features/dashboard/presentation/dashboard_home.dart';
+import 'package:rylax_admin/core/app-state/logged_in_container.dart';
 
 import '../services/auth_service.dart';
 import '../services/rylax_api_service.dart';
@@ -29,7 +29,8 @@ class _AuthGateState extends State<AuthGate> {
       var displayName = loggedInUser.displayName;
       var email = loggedInUser.email;
 
-      return DashboardHome();
+      print("AuthGate - User is Logged in - Using LoggedInAuthenticationContainer");
+      return LoggedInContainer();
     }
 
     return LoggedOutContainer();
