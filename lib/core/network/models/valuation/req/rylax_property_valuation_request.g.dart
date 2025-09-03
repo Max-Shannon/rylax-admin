@@ -20,7 +20,8 @@ RylaxPropertyValuationRequest _$RylaxPropertyValuationRequestFromJson(
   ..features = (json['features'] as List<dynamic>)
       .map((e) => e as String)
       .toList()
-  ..finishLevel = json['finishLevel'] as String;
+  ..finishLevel = json['finishLevel'] as String
+  ..propertyStyle = json['propertyStyle'] as String;
 
 Map<String, dynamic> _$RylaxPropertyValuationRequestToJson(
   RylaxPropertyValuationRequest instance,
@@ -35,4 +36,5 @@ Map<String, dynamic> _$RylaxPropertyValuationRequestToJson(
   'locationCounty': instance.locationCounty,
   'features': instance.features,
   'finishLevel': instance.finishLevel,
+  'propertyStyle': instance.propertyStyle,
 };

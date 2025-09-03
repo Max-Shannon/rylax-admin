@@ -14,6 +14,7 @@ class RylaxPropertyValuationRequest {
   late final String locationCounty;
   late final List<String> features;
   late final String finishLevel;
+  late final String propertyStyle;
 
   Map<String, dynamic> toJson() => _$RylaxPropertyValuationRequestToJson(this);
 

@@ -60,6 +60,7 @@ class _DashboardHomeState extends State<DashboardHome> {
 
   void openValuationTool(BuildContext context) {
     setState(() {
+      context.read<AppState>().setView(AppView.valuationTool);
       selectedWidget = ValuationTool();
     });
   }
