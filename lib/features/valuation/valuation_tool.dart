@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rylax_admin/core/network/models/valuation/req/rylax_property_valuation_request.dart';
+import 'package:rylax_admin/core/network/models/valuation/res/rylax_valuation_response.dart';
+import 'package:rylax_admin/core/services/navigation_service.dart';
+import 'package:rylax_admin/core/services/rylax_api_service.dart';
 import 'package:rylax_admin/core/styles/app_colors.dart';
 import 'package:rylax_admin/core/widgets/app_text.dart';
 
@@ -11,12 +15,15 @@ class ValuationTool extends StatefulWidget {
 }
 
 class _ValuationToolState extends State<ValuationTool> {
+  final RylaxAPIService rylaxAPIService = RylaxAPIService();
+  final NavigationService navigationService = NavigationService();
   final _formKey = GlobalKey<FormState>();
 
   // Controllers
   final _bedsCtrl = TextEditingController();
   final _bathsCtrl = TextEditingController();
-  final _locationCtrl = TextEditingController();
+  final _locationTownCtrl = TextEditingController();
+  final _locationCountyCtrl = TextEditingController();
   final _featuresCtrl = TextEditingController();
   final _sqmCtrl = TextEditingController();
   final _buildYearCtrl = TextEditingController();
@@ -35,7 +42,8 @@ class _ValuationToolState extends State<ValuationTool> {
   void dispose() {
     _bedsCtrl.dispose();
     _bathsCtrl.dispose();
-    _locationCtrl.dispose();
+    _locationTownCtrl.dispose();
+    _locationCountyCtrl.dispose();
     _featuresCtrl.dispose();
     _sqmCtrl.dispose();
     _buildYearCtrl.dispose();
@@ -43,29 +51,29 @@ class _ValuationToolState extends State<ValuationTool> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final payload = {
-      'beds': int.tryParse(_bedsCtrl.text),
-      'baths': int.tryParse(_bathsCtrl.text),
-      'location': _locationCtrl.text.trim(),
-      'features': _featuresCtrl.text
-          .split(',')
-          .map((s) => s.trim())
-          .where((s) => s.isNotEmpty)
-          .toList(),
-      'energyRating': _energyRating,
-      'squareMeters': double.tryParse(_sqmCtrl.text),
-      'approxBuildYear': int.tryParse(_buildYearCtrl.text),
-      'plotSizeSqm': double.tryParse(_plotSizeCtrl.text),
-      'finishLevel': _finishLevel,
-    };
+    var valuationRequest = RylaxPropertyValuationRequest();
+    valuationRequest.beds = int.tryParse(_bedsCtrl.text)!;
+    valuationRequest.baths = int.tryParse(_bathsCtrl.text)!;
+    valuationRequest.locationTown = _locationTownCtrl.text;
+    valuationRequest.locationCounty = _locationCountyCtrl.text;
+    valuationRequest.energyRating = _energyRating!;
+    valuationRequest.sqm = double.tryParse(_sqmCtrl.text)!;
+    valuationRequest.approxBuildYear = int.tryParse(_buildYearCtrl.text)!;
+    valuationRequest.plotSize = double.tryParse(_plotSizeCtrl.text)!;
+    valuationRequest.finishLevel = _finishLevel;
+    valuationRequest.features = _featuresCtrl.text
+        .split(',')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
 
-    // TODO: Replace with your actual submission logic / bloc / provider call.
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Submitted! $payload')),
-    );
+    Future<RylaxValuationResponse> response = rylaxAPIService.getValuationReport(valuationRequest);
+    navigationService.navigateToValuationView(context, response);
+    print("valuation report: $response");
+
   }
 
   InputDecoration _dec(String label, {String? hint, String? suffix}) {
@@ -131,8 +139,16 @@ class _ValuationToolState extends State<ValuationTool> {
 
                 // Location
                 TextFormField(
-                  controller: _locationCtrl,
-                  decoration: _dec('Location', hint: 'e.g. Rathnew, Co. Wicklow'),
+                  controller: _locationTownCtrl,
+                  decoration: _dec('Location', hint: 'e.g.Pebble Bay, Rathnew, Co. Wicklow'),
+                  validator: (v) =>
+                  (v == null || v.trim().isEmpty) ? 'Required' : null,
+                ),
+                const SizedBox(height: 12),
+
+                TextFormField(
+                  controller: _locationCountyCtrl,
+                  decoration: _dec('Location', hint: 'e.g. Rathnew/Wicklow Town, Co. Wicklow'),
                   validator: (v) =>
                   (v == null || v.trim().isEmpty) ? 'Required' : null,
                 ),

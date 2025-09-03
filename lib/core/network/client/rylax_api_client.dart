@@ -6,13 +6,33 @@ import 'package:rylax_admin/core/network/models/create_property_request.dart';
 import 'package:rylax_admin/core/network/models/development_dto.dart';
 import 'package:rylax_admin/core/network/models/development_response.dart';
 import 'package:rylax_admin/core/network/models/property_dto.dart';
+import 'package:rylax_admin/core/network/models/valuation/req/rylax_property_valuation_request.dart';
+import 'package:rylax_admin/core/network/models/valuation/res/rylax_valuation_response.dart';
 import 'package:rylax_admin/core/services/auth_service.dart';
 
 class RylaxAPIClient {
   final AuthService authService = AuthService();
 
-  final String baseUrl = 'http://192.168.1.132:8080/api/v1';
+  final String baseUrl = 'http://192.168.20.169:8080/api/v1';
   //final String baseUrl = 'http://10.201.55.196:8080/api/v1';
+
+  Future<RylaxValuationResponse> getValuationReport(RylaxPropertyValuationRequest valuationRequest) async {
+    final uri = Uri.parse("$baseUrl/ai/valuation-report");
+    final body = jsonEncode(valuationRequest.toJson());
+
+    final response = await http.post(
+      uri,
+      headers: {'Content-Type': 'application/json; charset=UTF-8', 'Authorization': "BYPASS"},
+      body: body,
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonMap = json.decode(response.body);
+      return RylaxValuationResponse.fromJson(jsonMap);
+    }
+
+    throw Exception('Failed to build valuation-report. Status: ${response.statusCode}');
+  }
 
   Future<DevelopmentDTO> getDevelopmentById(int developmentId) async {
     final uri = Uri.parse("$baseUrl/developments/$developmentId");
